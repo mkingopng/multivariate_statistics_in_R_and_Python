@@ -1,0 +1,53 @@
+---
+title: "ZZSC5855 --- Hypothesis Tests of Correlations"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r, message=FALSE}
+library(here)
+library(readr)
+library(dplyr)
+library(GGally)
+library(ggm)
+```
+
+
+# Challenge
+
+Recall the Portuguese red wines data:
+```{r}
+red.t <- read_csv(here("datasets","winequality-red.extract7.csv")) %>% mutate(`log sulphates`=log(`sulphates`), `root4 free sulfur dioxide` = (`free sulfur dioxide`)^(1/4), `root4 total sulfur dioxide` = (`total sulfur dioxide`)^(1/4), `log fixed acidity`=log(`fixed acidity`), `log volatile acidity`=log(`volatile acidity`), .keep="unused")
+ggpairs(red.t)
+```
+
+Consider the variables `pH`, `log fixed acidity` and `log volatile acidity`.
+
+### Task 1: Test the presence of correlation between pH and log volatile acidity, and interpret the results.
+
+#### Solution:
+```{r}
+R <- cor(red.t)
+pcor.test(R[2,7], 0, nrow(red.t))
+```
+
+There is sufficient evidence to believe that there is a correlation between pH and log volatile acidity.
+
+
+### Task 2: Test the presence of partial correlation between pH and log volatile acidity given log fixed acidity, and interpret the results.
+
+#### Solution:
+```{r}
+R <- cor(red.t)
+pcor.test(pcor(c(2,7,6), R), 1, nrow(red.t))
+```
+
+There is not sufficient evidence to believe that there is a correlation between pH and log volatile acidity after controlling for log fixed acidity.
+

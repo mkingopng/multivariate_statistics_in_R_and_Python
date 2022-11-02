@@ -1,0 +1,103 @@
+---
+title: "ZZSC5855 --- Multivariate Normal Distribution"
+author:
+- "Pavel Krivitsky"
+- "Deparment of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+
+```{r, message=FALSE}
+library(here)
+library(mvtnorm)
+library(GGally)
+library(MVN)
+library(dplyr)
+library(readr)
+```
+
+# Multivariate normal random variables
+
+## Generating
+
+The `*mvnorm` family of functions from the `mvtnorm` can be used to calculate densities and generate values from the multivariate normal. We will use the `ggpairs` function found in package `GGally`:
+```{r}
+(mu <- c(2,3,4))
+(Sigma <- diag(1:3) + 1)
+x <- rmvnorm(1000, mu, Sigma)
+dim(x)
+```
+we see that `x` has samples in rows and variables in columns.
+
+Let's plot these variables:
+```{r}
+ggpairs(as.data.frame(x))
+```
+
+## Marginally normal vs. jointly normal
+
+Consider two variables $Z_1=(2W-1)Y$ and $Z_2=Y$, where $Y\sim N(0,1)$ and, independently, $W \sim \operatorname{Binomial}(1,1/2)$ (so $2W-1$ takes $-1$ and $+1$ with equal probability).
+```{r}
+y <- rnorm(1000)
+w <- rbinom(1000,1,1/2)
+z <- cbind((2*w-1)*y, y)
+ggpairs(as.data.frame(z))
+```
+We see that they are normal marginally yet clearly not jointly.
+
+What happens when we use Mardia's diagnostics, using the `mvn` function in the `MVN` package?
+```{r}
+mvn(z)
+mvn(z, mvnTest="mardia", univariateTest="SW") # Methods we've discussed.
+```
+We see that normality tests for individual dimensions (i.e., Shapiro--Wilk) pass, but Mardia's kurtosis does not.
+
+Lastly, let us try viewing some *projections* of this distribution. For a true multivariate normal distribution, all projections are also normal. Here,
+```{r}
+zp1 <- z%*%c(1,-1)
+plot(density(zp1))
+```
+
+Contrasting with a true MVN, even correlated,
+```{r}
+xp1 <- x%*%c(1,-1,0)
+plot(density(xp1))
+xp2 <- x%*%rnorm(3) # A random projection.
+plot(density(xp2))
+```
+
+# Diagnosing multivariate normality
+
+These data, taken from Johnson and Wichern (2007), consist of measurements of radiation emitted from 42 randomly chosen microwave ovens, with doors open and closed. Load the data and plot:
+```{r}
+ovens <- read_csv(here("datasets","ovens.csv"))
+ggpairs(ovens)
+```
+Clearly, the data are not even close to MVN. Both variables are very strongly right-skewed.
+
+Let's see the hypothesis tests:
+```{r}
+mvn(ovens)
+mvn(ovens, mvnTest="mardia", univariateTest="SW") # Methods we've discussed.
+```
+We see that the multivariate tests for skewness and kurtosis reject the null hypotheses at any reasonable threshold.
+
+Now, let's try transforming the data. It should be noted that transformations can change the interpretation of the results.
+```{r}
+ovens4 <- ovens^(1/4) # Take 4th root.
+ggpairs(ovens4)
+```
+We now see far more normal-like shapes; though the `open` variable looks like it might be slightly bimodal or right-skewed.
+
+Let's try the tests:
+```{r}
+mvn(ovens4)
+mvn(ovens4, mvnTest="mardia", univariateTest="SW") # Methods we've discussed.
+```
+We see that both skewness and kurtosis are not inconsistent with a multivariate normal distribution.
+

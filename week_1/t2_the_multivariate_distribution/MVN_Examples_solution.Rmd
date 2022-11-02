@@ -1,0 +1,67 @@
+---
+title: "ZZSC5855 --- Multivariate Normal Distribution"
+author:
+- "Pavel Krivitsky"
+- "Deparment of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+
+```{r, message=FALSE}
+library(here)
+library(mvtnorm)
+library(GGally)
+library(MVN)
+library(dplyr)
+library(readr)
+```
+
+
+
+# Challenges
+
+Now, consider an extract from a dataset containing a number of chemical properties of Portuguese Vinho Verde wines and their quality, taken from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Wine+Quality). Eleven properties of a wine were measured, along with a subjective quality score. This was done for red and for white wines. For the purposes of this exercise, we will focus on the following 7 variables:
+* `fixed acidity`
+* `volatile acidity`
+* `free sulfur dioxide`
+* `total sulfur dioxide`
+* `density`
+* `pH`
+* `sulphates`
+
+Let's explore the data and see if any variables would need to be transformed for multivariate analysis:
+```{r}
+wine <- read_csv(here("datasets","winequality-red.extract7.csv"))
+```
+
+### Task 1: Make a pairwise plot of this dataset and identify which variables may deviate from normality. Perform the hypothesis tests. Do the results agree?
+
+#### Solution:
+```{r}
+ggpairs(wine)
+mvn(wine)
+```
+
+On the plot, we see that all variables except for `density` and perhaps `pH` deviate from normality. The Shapiro--Wilk test and the joint tests both show deviation from normality as well, likely because of the large (`r nrow(wine)`) sample size.
+
+### Task 2: Find an appropriate transformation for these variables, and check that they are now normal.
+
+#### Solution:
+A lot of trial and error. I get adequate results with,
+```{r}
+wine.t <- wine %>% mutate(`log sulphates`=log(`sulphates`), `root4 free sulfur dioxide` = (`free sulfur dioxide`)^(1/4), `root4 total sulfur dioxide` = (`total sulfur dioxide`)^(1/4), `log fixed acidity`=log(`fixed acidity`), `log volatile acidity`=log(`volatile acidity`), .keep="unused")
+ggpairs(wine.t)
+```
+
+Given the large sample size, most statistical procedures will probably be OK.
+
+Though, particularly given the sample size, the tests still reject:
+```{r}
+mvn(wine.t)
+```
+

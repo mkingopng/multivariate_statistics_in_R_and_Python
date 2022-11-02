@@ -1,0 +1,44 @@
+---
+title: "ZZSC5855 --- Copula Methods"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(readr)
+library(dplyr)
+library(purrr)
+library(reshape2)
+library(copula)
+library(GGally)
+library(stats4) # mle()
+library(Rsolnp)
+```
+
+
+# Challenges
+
+Recall the red wines dataset:
+* `fixed acidity`
+* `volatile acidity`
+* `free sulfur dioxide`
+* `total sulfur dioxide`
+* `density`
+* `pH`
+* `sulphates`
+
+```{r}
+red <- read_csv(here("datasets","winequality-red.extract7.csv"))
+```
+Previously, we would have transformed these data. Let's try to use copulas instead.
+
+### Task 1: Fit and diagnose a Gaussian copula with nonparametric margins to these data.
+

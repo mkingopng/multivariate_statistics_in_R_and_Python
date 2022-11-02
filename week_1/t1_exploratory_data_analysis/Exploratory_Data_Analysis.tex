@@ -1,0 +1,170 @@
+%! Author = noone
+%! Date = 28/10/22
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+
+% Document
+\begin{document}
+
+Dr Pavel Krivitsky gives you a brief overview of topics and concepts we'll be
+covering in this week.
+
+video: welcome to week 1 (1:06)
+
+\subsection{Weekly learning outcomes}\label{subsec:weekly-learning-outcomes}
+* Describe the basic properties of multivariate normal distribution.
+* Diagnose deviations from normality in real-world datasets.
+* Obtain and plot point estimates and confidence intervals for vector means and
+differences of vector means.
+* Test linear hypotheses about vector means and differences of vector means.
+* Explain the assumptions underlying the above inferential procedures.
+* Use R packages to perform analyses.
+
+\subsection{Topics we will cover are:}\label{subsec:topics-we-will-cover-are:}
+* Topic 1: Exploratory data analysis of multivariate data
+* Topic 2: The multivariate normal distribution
+* Topic 3: Estimation of vector mean and of variance matrices: point estimates
+* Topic 4: Confidence intervals and hypothesis tests for the mean vector
+
+\subsection{Optional readings}\label{subsec:optional-readings}
+An alternative presentation of the concepts for this week can be found in:
+
+Johnson, R. A., \& Wichern, D. (2008). Applied Multivariate Statistical Analysis
+(6th ed.). Pearson Prentice Hall.
+* 4.1–4.2, 4.6
+* 5.1–5.5 and 6.1–6.3
+
+Härdle, W. K., \& Simar, L. (2014). Applied Multivariate Statistical Analysis
+(4th ed.). Springer.
+* 1.4–1.7
+* 3.1–3.3
+* 4.4, 5.1–5.3, 6.1
+* 7.1–7.2
+
+All readings are available from the course Leganto reading list. Please keep in
+mind that you will need to be logged into Moodle to access the Leganto reading
+list.
+
+\section{Questions about this week's topics?}\label{sec:questions-about-this-week's-topics?}
+This week's topics were prepared by Dr P. Krivitsky.
+If you have any questions or comments, please post them under Discussion or
+email directly:
+p.krivitsky@unsw.edu.au
+
+\section{Exploratory data analysis of multivariate data}\label{sec:exploratory-data-analysis-of-multivariate-data}
+
+\subsection{Introduction}\label{subsec:introduction}
+We begin by taking a look at how to summarise multivariate data—with a focus on
+quantitative data—and to visualise it.
+
+\section{Data organisation}\label{sec:data-organisation}
+Assume, we are dealing with $p \geq 1$ *variables*.
+The values of these variables are all recorded for each distinct item,
+individual, or experimental trial.
+Each of these three words will sometimes be substituted by the word
+\("\)case\("\).
+We will use the notation $x_{ij}$ to indicate a particular value of the
+$i^{th}$ variable that is observed on the $j^{th}$ case.
+Consequently, $n$ measurements on $p$ variables can be represented in a form
+of a matrix
+
+\[
+X =
+\begin{pmatrix}
+x_{11} & x_{12} & \dots & x_{1j} & \dots & x_{1n} \\
+x_{21} & x_{22} & \dots & x_{2j} & \dots & x_{2n} \\
+x_{i1} & x_{i2} & \dots & x_{ij} & \dots & x_{in} \\
+x_{p1} & x_{p2} & \dots & x_{pj} & \dots & x_{pn} \\
+\end{pmatrix}
+\]
+
+The matrix $X$ above contains the data consisting of all the observations on
+all the variables.
+This way of representing the data allows easy manipulations
+to be performed in order to obtain some easy descriptive statistics for each
+of the variables.
+
+\section{Basic summaries}\label{sec:basic-summaries}
+For example, the sample mean of the second variable is just $\bar{x}_2 = \dfrac{1}{n} \sum_{j=1}^{n} x_{2j}$,
+the sample variance of the second variable is just $s_2^2 = \dfrac{1}{n}\sum_{j=1}^{n} x_{2j}$
+(Note that for the sample variance we shall sometimes use the divisor of $n - 1$
+rather than $n$ and each time this will be differentiated by displaying the
+appropriate expression).
+
+The sample covariance (the simple measure of linear association between
+variables 1 and 2) is given by $s_{12} = \dfrac{1}{n} \sum_{j=1}^{n}(x_{1j} - \bar{x}_1)(x_{2j} - \bar{x}_2)$
+and one can understand easily how $s_{ik}, i = 1,2, \dots, p, k = 1,2,\dots,p$ can be
+defined.
+Finally, the sample correlation coefficient (the measure of linear
+association between two variables that does not depend on the units of
+measurement) can be defined.
+The sample correlation coefficient of the $i^{th}$
+and $k^{th}$ variables is defined by $r_{ik} = \dfrac{s_{ik}}{\sqrt{s_{ii}\sqrt{s_{kk}}}}$.
+Because of the well-known
+Cauchy–Bunyakovsky–Schwartz Inequality, $|r_{ik}| \leq 1$ holds.
+Note also that $r_{ik}$ for all $i = 1,2,\dots,p$ and $k=1,2,\dots,p$ holds.
+
+It should be repeatedly noted that the sample correlations and covariance are
+useful only when trying to measure the linear association between two variables.
+Their value is less informative and is misleading in cases of nonlinear association.
+In this case one needs to invoke the correlation quotient instead.
+
+Since covariance and correlation coefficients are routinely calculated and
+analysed they are very widely used and provide useful numerical summaries of
+association when the data do not exhibit obvious nonlinear patterns of
+association.
+
+The descriptive statistics that we discussed until now are usually organised
+into arrays, namely:
+* Vector of sample means $\bar{x} = \big( \bar{x}_1, \bar{x}_2, \bar{x}_p \big)^T$
+* Matrix of sample variances and covariances
+\[
+\begin{matrix}
+\end{matrix}
+\]
+* Matrix of sample correlations  $$
+
+\section{Visualisation}\label{sec:visualisation}
+\subsection{Initial graphical representation of the data}\label{subsec:initial-graphical-representation-of-the-data}
+some simple characteristics of the data are worth studying before the actual
+multivariate analysis would begin:
+* drawing a scatter plot of the data
+* calculating simple univariate descriptive statistics for each variable
+* calculating sample correlation and covariance coefficients
+* linking multiple two-dimensional scatterplots
+
+# Example: R activity on basic multivariate summaries and visualisation
+The first practice example will demonstrate multivariate summary statistics and graphics.
+You can use the RStudio console here or complete the exercise on your own RStudio
+
+insert video
+
+To complete this task select the \('\)Multivariate\_exploration\_visualisation.Rmd'
+in the \('\)Files' section of RStudio.
+Follow the example contained within the RMD file.
+
+If you choose to complete the example in your own RStudio, upload the following
+file: `multivariate\_exploration\_visualisation.rmd`
+
+The output of the RMD file is also displayed below:
+
+In R there are implemented in the `base::colMeans`, `stats::cor`, `graphics::plot`,
+`graphis::pairs`, `GGally:ggpairs`.
+Here the format is `PACKAGE::FUNCTION` and you can learn more by running
+
+`library(PACKAGE)
+FUNCTION(PACKAGE)`
+
+Next, work through the basic multivariate summaries and visualisation example
+in the next section.
+
+video: R tutorial on Basic Multivariate summaries and visualisations
+
+Example: R activity on basic multivariate summaries and visualisation
+
+The output of the RMD file is also displayed below:
+\end{document}

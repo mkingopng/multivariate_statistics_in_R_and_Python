@@ -1,0 +1,68 @@
+---
+title: "ZZSC5855 --- Canonical Correlation Examples"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r, setup2, echo=FALSE, cache=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=8, message=FALSE, warning=FALSE, error=FALSE)
+```
+
+
+# Packages
+```{r, message=FALSE}
+library(here)
+library(CCA)
+library(CCP)
+library(GGally)
+library(dplyr)
+library(readr)
+library(purrr)
+select <- dplyr::select # Just to be safe.
+```
+
+
+# Challenge
+
+Recall the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
+
+`brand`
+: Pizza brand (class label)
+
+`id`
+: Sample analysed
+
+`prot`
+: Amount of protein per 100 grams in the sample
+
+`fat`
+: Amount of fat per 100 grams in the sample
+
+`ash`
+: Amount of ash per 100 grams in the sample
+
+`sodium`
+: Amount of sodium per 100 grams in the sample
+
+`carb`
+: Amount of carbohydrates per 100 grams in the sample
+
+`cal`
+: Amount of calories per 100 grams in the sample
+
+
+We will focus on brand A:
+```{r}
+pizzaA <- read_csv(here("datasets","pizza.csv")) %>% filter(brand=="A") %>% select(-brand)
+```
+
+### Task 1: Calculate the canonical correlations between caloric, ash, and sodium content (set 1) and fat, protein, and carbohydrate content (set 2). What do the vectors represent?
+
+
+### Task 2: Test the significance of correlation between the two sets; comment on the results. How many canonical correlations are significant, and what do they represent?
+

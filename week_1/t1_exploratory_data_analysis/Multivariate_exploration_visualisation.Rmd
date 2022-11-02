@@ -1,0 +1,66 @@
+---
+title: "ZZSC5855 --- R tutorial on basic multivariate summaries and visualisation"
+author:
+- "Pavel Krivitsky"
+- "based on notes by Spiridon Penev"
+- "Deparment of Statistics"
+- "The University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+The following example demonstrates basic multivariate summary statistics and graphics.
+
+The "Iris" dataset is built into the `stats` package, so we can acquire it via the `data()` function:
+```{r}
+data(iris)
+iris
+```
+
+# Basic data summaries
+
+The following illustrates both built-in summary functions and `dplyr`.
+
+To obtain basic 5-number summaries,
+```{r}
+summary(iris)
+```
+
+More generally, we can use the `apply` function to obtain univariate summaries for each variable:
+```{r}
+# Column means:
+colMeans(iris[,-5])
+# Column standard deviations:
+apply(iris[-5], 2, sd)
+# Column 95th %iles:
+apply(iris[-5], 2, quantile, 0.95) # This evaluates: quantile(x, 0.95) for x each column in turn.
+```
+
+Similarly, we can calculate multivariate summaries:
+```{r}
+# Variance-covariance matrix
+cov(iris[,-5])
+# Correlation matrix
+cor(iris[,-5])
+```
+
+We can also apply to subgroups. For this, we use the "pipe" operator `%>%` from package `magrittr`, which evaluates each function in turn, passing its results as the first argument of the next one (or `.`). We also use `map` function from the `purrr` package.
+```{r}
+library(magrittr)
+library(purrr)
+iris %>% # Start with dataset iris
+  split(iris$Species) %>% # Split it according to its species column
+  map(~.[-5]) %>% # For each species, throw away the last column (Species)
+  map(cov)
+```
+
+# Visualisation
+The most common visualisation for multivariate data is a pairwise plot: plot every variable against every other variable. A function that does it well---and automatically takes care of categorical variables---is `GGally`'s `ggpairs` function.
+
+```{r}
+library(GGally)
+# aes() here is optional, telling it to colour-code in accodance with species, and using transparency (alpha).
+ggpairs(iris, aes(colour=Species, alpha = 0.7))
+```

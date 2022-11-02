@@ -1,0 +1,54 @@
+---
+title: "ZZSC5855 --- Partial Correlations"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+
+```{r, message=FALSE}
+library(here)
+library(readr)
+library(dplyr)
+library(GGally)
+library(ggm)
+```
+
+# Intelligence, Weight, and Age
+
+Suppose that three variables have been measured for a set of schoolchildren:
+
+1. $X_{1}$: Intelligence
+2. $X_{2}$: Weight
+3. $X_{3}$: Age
+
+The number of observations was large enough so that one can assume the empirical correlation matrix $\hat{\rho}\in\mathcal{M}_{3,3}$ to be the true correlation matrix:
+$$\hat{\rho}=\begin{pmatrix}
+1 & 0.6162 & 0.8267\\
+0.6162 & 1 & 0.7321\\
+0.8267 & 0.7321 & 1
+\end{pmatrix}.$$
+This suggests there is a high degree of positive dependence between weight and intelligence. But let's compute the partial correlation adjusting for age: $$\hat{\rho}_{12.3}=\frac{\hat{\rho}_{12}-\hat{\rho}_{13}\hat{\rho}_{23}}{\sqrt{(1-\hat{\rho}_{13}^2)(1-\hat{\rho}_{23}^2)}}=\frac{0.6162-0.8267\times 0.7321}{\sqrt{(1-0.8267^2)(1-0.7321^2)}}=0.0286.$$
+Alternatively, R can do it for us:
+```{r}
+R <- matrix(c(1     , 0.6162, 0.8267,
+              0.6162, 1     , 0.7321,
+              0.8267, 0.7321, 1     ),
+            3,3)
+# Calculate the partial correlations for each pair of variables given the rest, and take the one between X1 and X2:
+parcor(R)[1,2]
+
+# Calculate the partial correlation between variables 1 and 2 given variable 3 in R:
+pcor(c(1:2,3), R)
+```
+
+Either way, after the effect of age is adjusted for, there is virtually no correlation between weight and intelligence, i.e. weight obviously plays little part in explaining intelligence.
+
+We will also use these data to study *testing* correlations.
+

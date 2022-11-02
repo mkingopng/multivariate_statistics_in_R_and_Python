@@ -1,0 +1,132 @@
+---
+title: "ZZSC5855 --- Discriminant Analysis"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(readr)
+library(MASS) # lda(), qda()
+library(dplyr) # Also, we want select() from here and not MASS, so we load it second.
+library(GGally)
+library(heplots) # boxM
+```
+
+# Iris Example
+The famous iris dataset contains four measurements on 150 flowers from three subspecies of iris: setosa, versicolor, and virginica. We will use it to illustrate linear and quadratic discriminant analysis.
+
+## Data
+
+This dataset is included with R. Let's load and visualise it.
+```{r}
+data(iris)
+iris
+ggpairs(iris, aes(colour=Species, alpha = 0.3))
+```
+
+## Linear discriminant analysis
+
+Suppose that we are prepared to assume that the three species have equal variances and covariances among the variables. Then, we can fit the linear discriminant analysis with the `lda()` function:
+```{r}
+(iris.lda <- lda(Species~., data=iris))
+```
+Note that the output format used by `lda` is somewhat different from the one we had derived in lecture. This is because it is optimised for rapidly classifying large numbers of observations.
+
+To illustrate the structure of classification, let's fit LDA based only on two variables: sepal length and sepal width. These are not the "best" variables for this, and this is deliberate.
+```{r}
+# Fit the LDA with only two predictors.
+(iris.lda2 <- lda(Species~Sepal.Length+Sepal.Width, data=iris))
+
+# Generate a grid of values covering the data.
+SLs <- seq(min(iris$Sepal.Length), max(iris$Sepal.Length), length.out=200)
+SWs <- seq(min(iris$Sepal.Width), max(iris$Sepal.Width), length.out=200)
+xy <- expand.grid(Sepal.Length=SLs, Sepal.Width=SWs)
+
+# Make the predictions:
+z <- factor(predict(iris.lda2, newdata=xy)$class) # See ? predict.lda() for structure.
+
+plot(xy[,1],xy[,2], col=z, xlab="Sepal Length",ylab="Sepal Width", pch=".")
+points(iris$Sepal.Length,iris$Sepal.Width, col=factor(iris$Species), pch=15) # pch=15 -> Filled squares
+```
+We see that the region boundaries are linear.
+
+But, of course, we should check that the variances are, in fact, equal. We learned how to do that last week:
+```{r}
+select(iris, -Species) %>% boxM(iris$Species)
+```
+The test confirms that they are different, though we could have also just looked at the plots. This does not mean that we cannot use LDA: it may still do a perfectly good job separating the groups. None the less, let's now consider QDA.
+
+## Quadratic discriminant analysis
+
+Let's begin by taking a look at the classification regions:
+```{r}
+# Fit the QDA with only two predictors.
+(iris.qda2 <- qda(Species~Sepal.Length+Sepal.Width, data=iris))
+
+# The grid is the same as before. Make the predictions:
+z <- factor(predict(iris.qda2, newdata=xy)$class) # See ? predict.qda() for structure.
+
+plot(xy[,1],xy[,2], col=z, xlab="Sepal Length",ylab="Sepal Width", pch=".")
+points(iris$Sepal.Length,iris$Sepal.Width, col=factor(iris$Species), pch=15) # pch=15 -> Filled squares
+```
+The boundaries are now curved. Let's zoom out:
+```{r}
+# Generate a grid of values covering the data.
+SLs <- seq(2, 10, length.out=200)
+SWs <- seq(0, 6, length.out=200)
+xy <- expand.grid(Sepal.Length=SLs, Sepal.Width=SWs)
+
+# Make the predictions:
+z <- factor(predict(iris.qda2, newdata=xy)$class) # See ? predict.lda() for structure.
+
+plot(xy[,1],xy[,2], col=z, xlab="Sepal Length",ylab="Sepal Width", pch=".")
+points(iris$Sepal.Length,iris$Sepal.Width, col=factor(iris$Species), pch=15) # pch=15 -> Filled squares
+```
+As you can see, the regions---particularly outside of the range of the data---can have weird shapes.
+
+Next, let's fit using all the predictors:
+```{r}
+(iris.qda <- qda(Species~., data=iris))
+```
+
+## Comparing classifiers
+
+### Confusion matrices
+
+Lastly, let's do some quick comparisons of these two classifiers. The simplest one is the confusion matrix: we obtain it by cross-tabulating the observed classes against the predicted. This can be done easily with the `table` function:
+```{r}
+# LDA (all 4)
+table(truth=iris$Species, prediction=predict(iris.lda)$class)
+# QDA (all 4)
+table(truth=iris$Species, prediction=predict(iris.qda)$class)
+# LDA (Sepal only)
+table(truth=iris$Species, prediction=predict(iris.lda2)$class)
+# QDA (Sepal only)
+table(truth=iris$Species, prediction=predict(iris.qda2)$class)
+```
+As you can see, the two behave about equally well.
+
+### Cross-validation
+
+This naive form of evaluation has the disadvantage that the same data are used to train the classifier as to test it. To get around this, we can use *cross-validation*: each observation in the dataset gets a turn being the predicted value based on the rest of the dataset. We can enable it using `CV=TRUE` option:
+```{r}
+# LDA (all 4)
+table(truth=iris$Species, prediction=lda(Species~.,data=iris,CV=TRUE)$class)
+# QDA (all 4)
+table(truth=iris$Species, prediction=qda(Species~.,data=iris,CV=TRUE)$class)
+# LDA (Sepal only)
+table(truth=iris$Species, prediction=lda(Species~Sepal.Length+Sepal.Width,data=iris,CV=TRUE)$class)
+# QDA (Sepal only)
+table(truth=iris$Species, prediction=qda(Species~Sepal.Length+Sepal.Width,data=iris,CV=TRUE)$class)
+```
+We see that LDA is slightly better than QDA in both cases. This is probably because the separating boundaries are close to linear.
+
+

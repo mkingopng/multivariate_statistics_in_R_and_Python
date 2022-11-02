@@ -1,0 +1,60 @@
+---
+title: "ZZSC5855 --- PCA Example"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+
+```{r, message=FALSE}
+library(here)
+library(GGally)
+library(dplyr)
+library(readr)
+library(purrr)
+```
+
+
+# Challenge
+
+Consider the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
+
+`brand`
+: Pizza brand (class label)
+
+`id`
+: Sample analysed
+
+`prot`
+: Amount of protein per 100 grams in the sample
+
+`fat`
+: Amount of fat per 100 grams in the sample
+
+`ash`
+: Amount of ash per 100 grams in the sample
+
+`sodium`
+: Amount of sodium per 100 grams in the sample
+
+`carb`
+: Amount of carbohydrates per 100 grams in the sample
+
+`cal`
+: Amount of calories per 100 grams in the sample
+
+
+We will focus on brand A:
+```{r}
+pizzaA <- read_csv(here("datasets","pizza.csv")) %>% filter(brand=="A") %>% select(-brand)
+```
+
+### Task 1: Perform the PCA on these data, and identify a good number of principal components to use. Which variables covary, and how?
+
+

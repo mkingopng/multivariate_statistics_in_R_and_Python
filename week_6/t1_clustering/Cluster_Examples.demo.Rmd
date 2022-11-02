@@ -1,0 +1,123 @@
+---
+title: "ZZSC5855 --- Cluster analysis"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(GGally)
+# stats is loaded by default
+library(readr)
+library(dplyr)
+library(candisc)
+library(cluster)
+library(mclust)
+```
+
+# Iris Example
+## Data
+
+Suppose that we had mixed up our lab samples and no longer know which specimen comes from which species. Can we recover the species?
+```{r}
+data(iris)
+iris0 <- iris[-5]
+```
+
+This plotting function will be helpful for visualising the clusterings produced:
+```{r}
+irisplot <- function(c){
+# Plot the Iris data variables pairwise, with clusters identified by colour and species by symbol.
+    pairs(iris0, col=c+1, pch=as.numeric(as.factor(iris$Species)))
+# Alternative approach: find the canonical discriminants for separating newly detected clusters, and plot those:
+    m <- lm(as.matrix(iris0)~factor(c)) # Fit a linear model with clustering as RHS.
+    cd <- candisc(m)
+    plot(cd, col=c("red","green","purple"))
+}
+```
+
+## Hierarchical clustering
+
+### Built-in (`stats` package)
+
+We begin with hierarchical clustering performed by `hclust()`, using the Ward's method with squared Euclidean distance. The following code produces a complete hierarchy:
+```{r}
+iris.h <- hclust(dist(iris0), method="ward.D2")
+plot(iris.h)
+```
+We then cut it at 3 clusters
+```{r}
+(iris.h3 <- cutree(iris.h,3)) # Three clusters
+table(species=iris$Species, cluster=iris.h3) # Can it recover the species?
+irisplot(iris.h3)
+```
+We observe 16 misclusterings, mostly virginicas being put into the majority-versicolor cluster.
+
+The canonical discrimination plot identifies all the variables except for sepal width as being relatively redundant with each other for the purposes of this clustering.
+
+### `cluster` package
+
+The `cluster` package allows for more flexible clustering, as well as support for silhouette calculation:
+```{r}
+iris.h <- agnes(iris0, method="ward") # More flexible; see help.
+irisplot(cutree(iris.h,3))
+# Which cluster number gives the best average silhouette width?
+d <- dist(iris0)
+plot(2:10,sapply(2:10, function(k) summary(silhouette(cutree(iris.h,k),d))$avg.width))
+plot(silhouette(cutree(iris.h,3), d))
+```
+The clustering is the same, but the silhouette plot does not select 3 clusters: in fact, it prefers 2, perhaps blurring together versicolor with virginica.
+
+## Non-hierarchical clustering
+
+### $k$-means
+
+Now, let's try $k$-means from the `stats` package:
+```{r}
+iris.3means <- kmeans(iris0,3)
+irisplot(iris.3means$cluster)
+table(species=iris$Species, cluster=iris.3means$cluster)
+plot(2:10,sapply(2:10, function(k) summary(silhouette(kmeans(iris0,k)$cluster,d))$avg.width))
+plot(silhouette(iris.3means$cluster, d))
+```
+$k$-means has the same misclassification rate, again mostly virginicas being placed into majority-versicolor clusters.
+
+### $k$-medioids
+
+$k$-medioids (a.k.a. "Partitioning Around Medioids"):
+```{r}
+iris.3meds <- pam(iris0,3)
+irisplot(iris.3meds$cluster)
+table(species=iris$Species, cluster=iris.3meds$cluster)
+plot(2:10,sapply(2:10, function(k) summary(silhouette(pam(iris0,k)$cluster,d))$avg.width))
+plot(silhouette(iris.3meds$cluster, d))
+```
+Similar results from $k$-medioids.
+
+### Model-based
+
+Lastly, let's try to find the best model-based clustering:
+```{r}
+# Automatic best model and cluster count selection via BIC:
+(iris.bestMBC <- Mclust(iris0))
+plot(iris.bestMBC, what=c("BIC", "classification"))
+```
+The model selected is the VEV model: varying dispersions, common eccentricities, and varying orientations. Two clusters are selected, again blurring virginica with versicolor.
+
+Alternatively, let's try forcing 3 clusters:
+```{r}
+(iris.3MBC <- Mclust(iris0,G=3))
+plot(iris.3MBC, what=c("classification", "uncertainty", "density"))
+irisplot(iris.3MBC$classification)
+table(species=iris$Species, cluster=iris.3MBC$classification)
+```
+A VEV model is again selected. Forcing 3 clusters actually produces a significantly lower error rate than others, with only 5 versicolors clustered with the virginicas.
+
+

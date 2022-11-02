@@ -1,0 +1,96 @@
+---
+title: "ZZSC5855 --- Hypothesis Tests of Correlations"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r, message=FALSE}
+library(here)
+library(readr)
+library(dplyr)
+library(GGally)
+library(ggm)
+```
+
+# Intelligence, Weight, and Age
+
+## Data
+
+Recall the 3-variable example from before:
+
+1. $X_{1}$: Intelligence
+2. $X_{2}$: Weight
+3. $X_{3}$: Age
+
+Suppose that these correlations are actually based on sample size $n=20$:
+$$\hat{\rho}=\begin{pmatrix}
+1 & 0.6162 & 0.8267\\
+0.6162 & 1 & 0.7321\\
+0.8267 & 0.7321 & 1
+\end{pmatrix}.$$
+
+```{r, echo=FALSE}
+R <- matrix(c(1     , 0.6162, 0.8267,
+              0.6162, 1     , 0.7321,
+              0.8267, 0.7321, 1     ),
+            3,3)
+```
+
+## Testing correlations
+
+We wish to test if there is sufficient evidence that weight and intelligence are correlated.
+
+### Ordinary correlation
+
+We can begin by using the $t$-test:
+$$T=\hat{\rho}_{ij}\sqrt{\frac{n-2}{1-\hat{\rho}_{ij}^{2}}}=`r R[1,2]`\sqrt{\frac{n-2}{1-`r R[1,2]`^{2}}}=`r R[1,2]*sqrt((20-2)/(1-R[1,2]^2))`.$$
+The $t$ distribution has $n-2$ degrees of freedom:
+```{r}
+R <- matrix(c(1     , 0.6162, 0.8267,
+              0.6162, 1     , 0.7321,
+              0.8267, 0.7321, 1     ),
+            3,3)
+
+2*pt(abs(R[1,2]*sqrt((20-2)/(1-R[1,2]^2))), 20-2, lower.tail=FALSE)
+```
+We can also use the `pcor.test()` function in `ggm`:
+```{r}
+pcor.test(R[1,2], 0, 20)
+```
+
+Alternatively, we can use Fisher's $Z$ approximation:
+$$Z = \frac{1}{2}\log\frac{1+\hat{\rho}_{12}}{1-\hat{\rho}_{12}}=\frac{1}{2}\log\frac{1+`r R[1,2]`}{1-`r R[1,2]`}=`r log((1+R[1,2])/(1-R[1,2]))/2`.$$
+Under the null hypothesis, this statistic will have mean 0 and variance $1/(n-3)$, so we compute a two-sided $p$-value as
+```{r}
+2*pnorm(abs(log((1+R[1,2])/(1-R[1,2]))/2), 0, sqrt(1/(20-3)), lower.tail=FALSE)
+```
+
+We conclude that the correlation is highly significant.
+
+### Partial correlation
+
+To test partial correlation given age, we compute the sample value,
+```{r}
+(r12.3 <- pcor(c(1,2,3), R))
+```
+Then,
+$$Z = \frac{1}{2}\log\frac{1+\hat{\rho}_{12.3}}{1-\hat{\rho}_{12.3}}=\frac{1}{2}\log\frac{1+`r r12.3`}{1-`r r12.3`}=`r log((1+r12.3)/(1-r12.3))/2`,$$
+and the variance is $1/(n-(p-r)-3)$. Here $p-r$ is the number of conditioned-on variables, which is in this case 1.
+```{r}
+2*pnorm(abs(log((1+r12.3)/(1-r12.3))/2), 0, sqrt(1/(20-1-3)), lower.tail=FALSE)
+```
+
+Similarly, we can use the $t$-test, using `pcor.test()`:
+```{r}
+pcor.test(r12.3, 1, 20)
+```
+
+We conclude that there is not sufficient evidence of correlation.
+

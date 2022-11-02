@@ -1,0 +1,205 @@
+---
+title: "ZZSC5855 --- Multivariate Confidence Regions"
+author:
+- "Pavel Krivitsky"
+- "based on Johnson and Wichern AMSA, Examples 5.3--5.4"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook:
+    code_folding: "none"
+  pdf_document: default
+---
+
+
+# Packages
+
+```{r, message=FALSE}
+library(here)
+library(car) # For drawing ellipsoids.
+library(GGally)
+library(readr)
+library(dplyr)
+library(expm) # For %^% matrix power.
+```
+
+
+# Challenge
+
+## One-sample intervals
+
+We continue our analysis of of Portuguese red wines. We begin with the transformation suggested in the Multivariate Normality exercises:
+```{r}
+red.t <- read_csv(here("datasets","winequality-red.extract7.csv")) %>% mutate(`log sulphates`=log(`sulphates`), `root4 free sulfur dioxide` = (`free sulfur dioxide`)^(1/4), `root4 total sulfur dioxide` = (`total sulfur dioxide`)^(1/4), `log fixed acidity`=log(`fixed acidity`), `log volatile acidity`=log(`volatile acidity`), .keep="unused")
+ggpairs(red.t)
+```
+
+### Task 1: Plot the data and the 95% confidence ellipse for the mean `log fixed acidity` and `log volatile acidity`.
+
+#### Solution:
+```{r}
+plot(`log volatile acidity`~`log fixed acidity`, data=red.t, pch='.')
+confidenceEllipse(lm(cbind(`log fixed acidity`, `log volatile acidity`)~1, data=red.t), add=TRUE)
+```
+
+
+### Task 2: Report the simultaneous confidence intervals for the mean `log fixed acidity` and `log volatile acidity` using the projections of the ellipsoid and the Bonferroni method. Which are wider? Why?
+
+#### Solution:
+```{r}
+# From the demo above.
+contrastCI <- function(l, n, m, S, CL=0.95){
+    p <- length(m)
+    # Note the use of "*c(-1,+1)" as plus-or-minus.
+    c(crossprod(l,m)) + c(-1,+1)* c(sqrt(p*(n-1)/(n-p)*qf(CL, p, n-p) * t(l)%*%S%*%l/n))
+}
+
+
+# This constructs an n-vector with 1 in i'th position and 0s elsewhere.
+e <- function(i, n) c(numeric(i-1), 1, numeric(n-i))
+
+# Let's extract only the relevant variables from the dataset:
+head(red.t12 <- select(red.t, `log fixed acidity`, `log volatile acidity`))
+
+# Construct the summary statistics:
+n <- nrow(red.t12)
+p <- ncol(red.t12)
+m <- colMeans(red.t12)
+S <- cov(red.t12)
+
+# Ellipsoid:
+CCIs <- sapply(1:p, function(i) contrastCI(e(i,p), n, m, S))
+colnames(CCIs) <- names(m)
+# Bonferroni:
+BCIs <- sapply(1:p, function(i) t.test(red.t12[[i]], conf.level = 1-(1-.95)/p)$conf.int)
+colnames(BCIs) <- names(m)
+
+CCIs
+BCIs
+```
+
+We can even calculate the widths of the confidence intervals, i.e.,
+```{r}
+diff(CCIs)
+diff(BCIs)
+```
+
+### Task 3: Now, report the simultaneous confidence intervals for all 7 variables in the dataset using the projections of the ellipsoid and the Bonferroni method. Which are wider? Why?
+
+#### Solution:
+```{r}
+# Construct the summary statistics:
+n <- nrow(red.t)
+p <- ncol(red.t)
+m <- colMeans(red.t)
+S <- cov(red.t)
+
+# Ellipsoid:
+CCIs <- sapply(1:p, function(i) contrastCI(e(i,p), n, m, S))
+colnames(CCIs) <- names(m)
+# Bonferroni:
+BCIs <- sapply(1:p, function(i) t.test(red.t[[i]], conf.level = 1-(1-.95)/p)$conf.int)
+colnames(BCIs) <- names(m)
+
+CCIs
+BCIs
+
+diff(CCIs)
+diff(BCIs)
+```
+
+## Two-sample intervals and tests
+
+Now, consider a related dataset with the same measurements of Portuguese *white* wines. We will apply the same transformation to those as for the red wines:
+```{r}
+white.t <- read_csv(here("datasets","winequality-white.extract7.csv")) %>% mutate(`log sulphates`=log(`sulphates`), `root4 free sulfur dioxide` = (`free sulfur dioxide`)^(1/4), `root4 total sulfur dioxide` = (`total sulfur dioxide`)^(1/4), `log fixed acidity`=log(`fixed acidity`), `log volatile acidity`=log(`volatile acidity`), .keep="unused")
+ggpairs(white.t)
+```
+
+### Task 4: Produce a pairwise plot of the two datasets together, colour-coded by wine type. Comment on the apparent differences.
+
+#### Solution:
+```{r}
+# This conveniently adds a "type" column indicating whether the wine is red or white.
+head(wine.t <- bind_rows(list(red=red.t, white=white.t), .id="type"))
+ggpairs(wine.t, mapping=aes(col=type, alpha=0.1), legend=1) + theme(legend.position="right")
+```
+* Density of white wines appears to be lower and more varied than that of the red wines.
+* pH, sulphates, and volatile acidity of white wines appears to be lower than that of red wines while having about the same dispersion.
+* Free sulphur dioxide and total sulphur dioxide in white wines appears to be higher than that of red wines and less dispersed.
+* Fixed acidity of white wines is lower and less varied than that of the red wines.
+
+Certain correlations differ. For example, fixed acidity and volatile acidity appear to be correlated for the red wines but not the white wines.
+
+
+### Task 5: Assuming equal variances, implement the 2-Sample Hotelling's $T^2$ test described in **Comparison of two or more mean vectors** and use it to test the null hypothesis that all of the features of red and white wines are equal in expectation. Calculate the test statistic ($T^2$), the $\alpha=0.05$ critical value (i.e., rejection threshold) for $T^2$, and the $p$-value.
+
+#### Solution:
+```{r}
+# Evaluate statistics
+(p <- ncol(red.t))
+(n.r <- nrow(red.t))
+m.r <- colMeans(red.t)
+S.r <- cov(red.t)
+
+(n.w <- nrow(white.t))
+m.w <- colMeans(white.t)
+S.w <- cov(white.t)
+
+# Pooled covariance matrix
+S.p <- ((n.r-1)*S.r + (n.w-1)*S.w) / (n.r + n.w - 2)
+
+# Test statistic
+(T2 <- (m.r-m.w) %*% solve(S.p*(1/n.r+1/n.w)) %*% (m.r-m.w))
+
+# Critical value:
+qf(0.95, p, n.r+n.w-p-1) * (n.r+n.w-2)*p/(n.r+n.w-p-1)
+
+# p-value:
+Fstat <- T2 * (n.r+n.w-p-1)/(n.r+n.w-2)/p # The equivalent F-statistic.
+pf(Fstat, p, n.r+n.w-p-1, lower.tail=FALSE)
+
+# Note that although they produce the same p-values, these use different
+# test statistics and parametrise them differently: some use T^2 directly,
+# others scale it into F.
+
+library(ICSNP)
+HotellingsT2(red.t, white.t)
+
+library(rrcov)
+T2.test(red.t, white.t)
+
+library(ergm)
+approx.hotelling.diff.test(red.t, white.t, assume.indep=TRUE, var.equal=TRUE)
+```
+
+
+### Task 6: Repeat Task 5 assuming unequal variances. Also report the effective sample size for variance estimation ($\nu$).
+
+#### Solution:
+```{r}
+# Evaluate statistics
+
+# Test statistic
+(T2 <- (m.r-m.w) %*% solve(S.r/n.r+S.w/n.w) %*% (m.r-m.w))
+
+# nu
+tr <- function(x) sum(diag(x))
+
+(nu <- (p + p^2)/(
+(tr((S.r%*%solve(S.r/n.r+S.w/n.w)/n.r)%^%2) + tr(S.r%*%solve(S.r/n.r+S.w/n.w)/n.r)^2)/n.r +
+(tr((S.w%*%solve(S.r/n.r+S.w/n.w)/n.w)%^%2) + tr(S.w%*%solve(S.r/n.r+S.w/n.w)/n.w)^2)/n.w
+))
+
+# Critical value:
+qf(0.95, p, nu-p+1) * nu*p/(nu-p+1)
+
+# p-value:
+Fstat <- T2 * (nu-p+1)/nu/p # The equivalent F-statistic.
+pf(Fstat, p, nu-p+1, lower.tail=FALSE)
+
+# Using the ergm package:
+library(ergm)
+approx.hotelling.diff.test(red.t, white.t, assume.indep=TRUE, var.equal=FALSE)
+```
+

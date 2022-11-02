@@ -1,0 +1,64 @@
+---
+title: "ZZSC5855 --- Multivariate Confidence Regions"
+author:
+- "Pavel Krivitsky"
+- "based on Johnson and Wichern AMSA, Examples 5.3--5.4"
+- "Deparment of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook:
+    code_folding: "none"
+  pdf_document: default
+---
+
+
+# Packages
+
+```{r, message=FALSE}
+library(here)
+library(car) # For drawing ellipsoids.
+library(GGally)
+library(readr)
+library(dplyr)
+library(expm) # For %^% matrix power.
+```
+
+
+# Challenge
+
+## One-sample intervals
+
+We continue our analysis of of Portuguese red wines. We begin with the transformation suggested in the Multivariate Normality exercises:
+```{r}
+red.t <- read_csv(here("datasets","winequality-red.extract7.csv")) %>% mutate(`log sulphates`=log(`sulphates`), `root4 free sulfur dioxide` = (`free sulfur dioxide`)^(1/4), `root4 total sulfur dioxide` = (`total sulfur dioxide`)^(1/4), `log fixed acidity`=log(`fixed acidity`), `log volatile acidity`=log(`volatile acidity`), .keep="unused")
+ggpairs(red.t)
+```
+
+### Task 1: Plot the data and the 95% confidence ellipse for the mean `log fixed acidity` and `log volatile acidity`.
+
+
+
+### Task 2: Report the simultaneous confidence intervals for the mean `log fixed acidity` and `log volatile acidity` using the projections of the ellipsoid and the Bonferroni method. Which are wider? Why?
+
+
+### Task 3: Now, report the simultaneous confidence intervals for all 7 variables in the dataset using the projections of the ellipsoid and the Bonferroni method. Which are wider? Why?
+
+
+## Two-sample intervals and tests
+
+Now, consider a related dataset with the same measurements of Portuguese *white* wines. We will apply the same transformation to those as for the red wines:
+```{r}
+white.t <- read_csv(here("datasets","winequality-white.extract7.csv")) %>% mutate(`log sulphates`=log(`sulphates`), `root4 free sulfur dioxide` = (`free sulfur dioxide`)^(1/4), `root4 total sulfur dioxide` = (`total sulfur dioxide`)^(1/4), `log fixed acidity`=log(`fixed acidity`), `log volatile acidity`=log(`volatile acidity`), .keep="unused")
+ggpairs(white.t)
+```
+
+### Task 4: Produce a pairwise plot of the two datasets together, colour-coded by wine type. Comment on the apparent differences.
+
+
+### Task 5: Assuming equal variances, implement the 2-Sample Hotelling's $T^2$ test described in **Comparison of two or more mean vectors** and use it to test the null hypothesis that all of the features of red and white wines are equal in expectation. Calculate the test statistic ($T^2$), the $\alpha=0.05$ critical value (i.e., rejection threshold) for $T^2$, and the $p$-value.
+
+
+
+### Task 6: Repeat Task 5 assuming unequal variances. Also report the effective sample size for variance estimation ($\nu$).
+
+

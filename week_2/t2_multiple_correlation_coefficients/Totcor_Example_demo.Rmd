@@ -1,0 +1,41 @@
+---
+title: "ZZSC5855 --- Total Correlations"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+
+```{r, message=FALSE}
+library(GGally)
+```
+
+# Equivalence between total correlation and regression
+
+This example demonstrates that total correlation is equivalent to the square root of the coefficient of determination of a linear regression.
+```{r}
+x1 <- rnorm(100)
+x2 <- rnorm(100)+x1
+y <- x1*2+x2+rnorm(100)
+
+ggpairs(data.frame(y,x1,x2))
+```
+
+Now, consider the following equivalent ways to compute it:
+```{r}
+# R^2 reported by summary.lm():
+summary(lmfit <- lm(y~x1+x2))
+
+# Correlation between the response and the fitted values:
+cor(predict(lmfit), y)
+cor(predict(lmfit), y)^2
+
+# From the correlation matrix:
+1-1/solve(cor(cbind(y,x1,x2)))[1,1]
+```

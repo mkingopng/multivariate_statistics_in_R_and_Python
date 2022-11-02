@@ -1,0 +1,126 @@
+---
+title: "ZZSC5855 --- Multivariate Confidence Regions"
+author:
+- "Pavel Krivitsky"
+- "based on Johnson and Wichern AMSA, Examples 5.3--5.4"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook:
+    code_folding: "none"
+  pdf_document: default
+---
+
+
+# Packages
+```{r, message=FALSE}
+library(here)
+library(car) # For drawing ellipsoids.
+library(GGally)
+library(readr)
+library(dplyr)
+library(expm) # For %^% matrix power.
+```
+
+# The Microwave Ovens Example
+
+We will use the data in Johnson and Wichern (2007), Examples 5.3--5.4 to illustrate Hotelling's $T^2$ confidence regions and to develop some intuition for their construction.
+
+## Data
+
+We begin by loading the data and transforming (See the Multivariate Normal exercises.):
+```{r}
+ovens4 <- read_csv(here("datasets","ovens.csv"))^(1/4)
+ggpairs(ovens4)
+```
+
+## Summaries
+
+Let's compute the basic data summaries:
+```{r}
+(n <- nrow(ovens4)) # sample size
+(p <- ncol(ovens4)) # number of variables
+(m <- colMeans(ovens4)) # sample mean
+(S <- cov(ovens4)) # S
+(Sinv <- solve(S)) # S^-1
+```
+
+## $T^2$ confidence ellipsoid
+
+The following demonstration is intended to provide intuition for how a confidence ellipsoid is constructed.
+
+We first define a function testing if a value is in the confidence ellipsoid. This is essentially a direct implementation of **Confidence region for mean vector**:
+```{r}
+in_ellipsoid <- function(x, n, m, Sinv, CL=0.95){
+    p <- length(m)
+    n*(m-x)%*%Sinv%*%(m-x) <= p*(n-1)/(n-p) * qf(CL, p, n-p)
+}
+```
+
+We then draw a confidence ellipsoid in a very inefficient manner by taking a large number of points and testing them for being inside it. A more efficient way is to take the eigendecomposition of $\hat{\Sigma}$ and construct a parametric equation for its outline, then plot that. Let's draw both on the same plot.
+```{r}
+# Brute-force:
+closeds <- seq(.50,.65,length.out=200)
+opens <- seq(.55,.66,length.out=200)
+xy <- expand.grid(closeds,opens)
+z <- apply(xy, 1, in_ellipsoid, n, m, Sinv)
+# Note: For meanings of asp=1 see ? par .
+plot(xy[,1],xy[,2], col=z, xlab="closed",ylab="open", pch=".", asp=1)
+points(m[1],m[2], col=2)
+
+# Eigendecomposition:
+(S.e <- eigen(S))
+
+scl <- p*(n-1)/(n-p) * qf(0.95, p, n-p) / n
+lines(rbind(m-S.e$vectors[,1]*sqrt(S.e$values[1]*scl), m+S.e$vectors[,1]*sqrt(S.e$values[1]*scl))) # Major axis
+lines(rbind(m-S.e$vectors[,2]*sqrt(S.e$values[2]*scl), m+S.e$vectors[,2]*sqrt(S.e$values[2]*scl))) # Minor axis
+```
+
+The popular R package `car` provides a tool for drawing a confidence ellipsoid. Note the intermediate step of fitting a multivariate linear model with variables on the LHS:
+```{r}
+plot(open~closed, data=ovens4)
+# I.e. fit a multivariate linear model (more on that later) with just the intercept:
+confidenceEllipse(lm(cbind(closed,open)~1, data=ovens4), add=TRUE) # add=TRUE means don't start a new plot.
+```
+
+Any point in this ellipsoid is a plausible value for the joint population mean microwave radiation releases.
+
+## Simultaneous intervals
+
+In practice, we may also want to express the intervals numerically. We shall discuss two ways of doing so.
+
+## Projection of the ellipsoid
+
+Firstly, we can use "shadows" (projections) of the confidence ellipsoid onto the axes (or, technically, onto any other linear combination). The following function implements Theorem 4.3:
+```{r}
+contrastCI <- function(l, n, m, S, CL=0.95){
+    p <- length(m)
+    # Note the use of "*c(-1,+1)" as plus-or-minus.
+    c(crossprod(l,m)) + c(-1,+1)* c(sqrt(p*(n-1)/(n-p)*qf(CL, p, n-p) * t(l)%*%S%*%l/n))
+}
+```
+We can then evaluate these for unit vectors to get contrast CIs:
+```{r}
+l <- c(1,0) # Closed
+(closedCI <- contrastCI(l, n, m, S))
+l <- c(0,1) # Open
+(openCI <- contrastCI(l, n, m, S))
+```
+Observe their relationship to the ellipsoid:
+```{r}
+confidenceEllipse(lm(cbind(closed,open)~1, data=ovens4), xlab="closed",ylab="open")
+abline(v=closedCI)
+abline(h=openCI)
+```
+
+## Bonferroni
+
+Finally, Bonferroni: this is just a pair of one-sample $t$-intervals with at a higher individual CL:
+```{r}
+(closedBCI <- t.test(ovens4$closed,conf.level=.975)$conf.int)
+(openBCI <- t.test(ovens4$open,conf.level=.975)$conf.int)
+```
+
+Observe that these are slightly narrower. This is because the ellipsoid intervals are simultaneously true for *every* linear combination, so we could, say, compute an interval for `open-closed` contrast using the ellipsoid projection without any additional "miss" probability.
+
+

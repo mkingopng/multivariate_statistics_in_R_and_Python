@@ -1,0 +1,81 @@
+---
+title: "ZZSC5855 --- Matrices"
+author:
+- "Pavel Krivitsky"
+- "based on notes by Spiridon Penev"
+- "Deparment of Statistics"
+- "The University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+
+# Challenges
+
+### Task 1: Explain why the empirical covariance matrix (with a factor (1/(n-1) in front) of the 5 variables X1, X2, X3, X4, X5 can be calculated within R by using the following commands:
+
+```{r, eval=FALSE}
+X <- cbind(x1,x2,x3,x4,x5)
+n <- nrow(X)
+S <- 1/(n-1) * t(X)%*%(diag(n)-1/n*matrix(1,n,n))%*%X
+```
+
+
+### Task 2: Using matrices to calculate linear regression
+
+Now you try the following exercise: using R, enter the following
+matrix $X =$
+
+| $\boldsymbol{x}_1$ | $\boldsymbol{x}_2$ | $\boldsymbol{x}_3$ |
+|--------------------|--------------------|--------------------|
+| 1                  | 1                  | 1                  |
+| 1                  | 2                  | 4                  |
+| 1                  | 3                  | 9                  |
+| 1                  | 4                  | 16                 |
+| 1                  | 5                  | 25                 |
+
+Enter the output $\boldsymbol{y}$ which is supposed to be a column-vector
+containing the 5 output observations 1, 5, 9, 23, 36. Calculate the
+least-squares estimate $\boldsymbol{b} =(X'X)^{-1}X'\boldsymbol{y}$.
+Next, using it, calculate the predictions $\hat{\boldsymbol{y}}= X\boldsymbol{b}$, the
+residuals $\boldsymbol{r} = \boldsymbol{y} - \hat{\boldsymbol{y}}$, the sum of squares of residuals
+($\operatorname{SSE}$), the degress of freedom
+$df = \operatorname{nrow}(X) - \operatorname{ncol}(X)$ and the mean-squared
+error error estimate $\operatorname{MSE} = \operatorname{SSE}/\operatorname{df}$ for the regression equation
+$$y = \beta_{0}+ \beta_{1} x + \beta_{2}x^{2}+ \varepsilon.$$
+
+Print out the data and all the calculated quantities.
+
+Now, create within R a function called `regress(X,y)` which uses
+as entries a matrix `X` and a vector `y`, calculates the above
+quantities and prints them out. Test the function by using the values
+of `X` and `y` as above (you are supposed to get the same
+results as before). Then extend the matrix `X` by adding one more
+row of values: (1,6,36) to the existing 5 rows, add a sixth output value
+(42) to the `y` vector and recalculate the quantities by just
+calling the subroutine again with the new entries for `X` and
+`y`.
+
+**Hint:** To extend the matrix `X` by one more row `Z1` of suitable
+dimension you can write `X <- rbind(X,Z1)`, and to extend it by one more column `Z2` of
+suitable dimension you could write `X <- cbind(X,Z2)`.
+
+
+### Task 3: Matrix power
+
+Implement a function `matpow(X, p)` that takes a symmetric, positive definite matrix `X` and a scalar `p` and returns `X` taken to the power `p`, including for negative and fractional values of `p`.
+
+Use it to evaluate the square, the square root, the inverse, and the square root of the inverse of the following matrix:
+
+```
+ 2  2  1
+ 2  3  2
+ 1  2  4
+```
+
+Then, check your answers using basic matrix operations. (For example, compare `matpow(X,2)` with `X` multiplied by itself, check the inverse against `solve()`, and check that the square root of the matrix multiplied by itself recovers the original matrix.)
+
+**Hint:** See the example for the `eigen()` function above and the lecture notes on the relationship between eigendecomposition and matrix powers.
+

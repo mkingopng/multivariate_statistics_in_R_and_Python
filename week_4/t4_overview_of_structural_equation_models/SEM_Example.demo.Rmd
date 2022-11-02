@@ -1,0 +1,129 @@
+---
+title: "ZZSC5855 --- Structural Equation Modelling"
+author:
+- "Pavel Krivitsky, based on Lavaan tutorial"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(lavaan)
+library(tidySEM)
+```
+
+
+# Anomie
+The following example is adapted with modifications from [Lavaan Tutorial](http://lavaan.ugent.be/tutorial/cov.html).
+
+In 1977, Wheaton, Muthen, Alwin, and Summers used a structural equation model to model a longitudinal study that measured the sense of anomie ("a condition in which society provides little moral guidance to individuals") and a sense of powerlessness in respondents across two waves: 1967 and 1971.
+
+## Data
+Measured (observed) variables on each respondent included:
+
+`Anomie67`
+: A measurement on the sense of anomie scale in 1967.
+
+`Anomie71`
+: A measurement on the sense of anomie scale in 1971.
+
+`Powerlessness67`
+: A measurement on the sense of powerlessness scale in 1967.
+
+`Powerlessness71`
+: A measurement on the sense of powerlessness scale in 1971.
+
+`Education`
+: A measurement of educational attainment.
+
+`SEI`
+: SocioEconomic Index: a measurement of economic well-being.
+
+Package `lavaan` provides a convenience function, `getCov`, to load a variance-covariance matrix from a character string containing its lower triangle and diagonal:
+```{r}
+lower <- '
+ 11.834
+  6.947   9.364
+  6.819   5.091  12.532
+  4.783   5.028   7.495   9.986
+ -3.839  -3.889  -3.841  -3.625  9.610
+-21.899 -18.831 -21.748 -18.775 35.522 450.288 '
+
+wheaton.cov <- 
+    getCov(lower, names = c("Anomie67", "Powerless67", 
+                            "Anomie71", "Powerless71",
+                            "Education", "SEI"))
+wheaton.cov
+```
+
+## Model specification
+
+The SEM is specified as an R string with syntax similar to R formulas but with special operations: `=~` for defining a latent variable, `~` for defining a regression (possibly among latent variables), and `~~` for defining correlation. The lines of model below can be read as follows (using the notation of the lecture notes).
+
+1. Output latent variable $\eta_1=$`Alien67` (sense of Alienation in 1967) is measured by output observed variables $Y_1=$`Anomie67` and $Y_2=$`Powerless67`, with coefficients specified to be 1.0 and 0.833. Note that this does not mean that they exactly equal, since there are also the noise terms $\epsilon_1$ and $\epsilon_2$.
+2. Similarly, output latent variable $\eta_2=$`Alien71` (sense of Alienation in 1971) is measured by output observed variables $Y_3=$`Anomie71` and $Y_4=$`Powerless71`, with coefficients again specified to be 1.0 and 0.833.
+3. Input latent variable `SES` (SocioEconomic Status) is measured by input observed variables `Education` and `SEI`. That is, $\xi_1=$`SES`, $X_1$=`Education`, $X_2$=`SEI`, and we also "lock" the coefficient between `Education` and `SES`, $\Lambda_{X,1,1}=1$. We lock this coefficient to identify the variable, since one can get the same model by scaling the variable and inverse-scaling the coefficients. The coefficient $\Lambda_{X,2,1}$ is free. (Note that we could have given it a name or "locked" it with another coefficient by putting `<NAME>*` in front of `SES`.)
+4. Alienation in 1967 is a linear function of socioeconomic status (and error). (That is, $\Gamma_{1,1}$ is a free parameter.)
+5. Alienation in 1971 is a linear function of alienation in 1967 and socioeconomic status (and error). (That is, $\Gamma_{2,1}$ and $B_{1,2}$ are free parameters, and other elements of $B$ are fixed at 0.)
+6. The residual variance of anomie in 1967 is the same as that in 1971. (That is, $\epsilon_1$ and $\epsilon_3$ have the same variance, which we call `theta1`.)
+7. Similarly, the residual variance of powerlessness in 1967 is the same as that in 1971. (That is, $\epsilon_2$ and $\epsilon_4$ have the same variance, which we call `theta2`.)
+8. Furthermore, there is a residual correlation between a person's anomie measurements in 1967 and 1971 (respectively, $\epsilon_1$ and $\epsilon_3$). We call it `theta3`.
+9. `theta3` is also the residual correlation between a person's powerlessness measurements in 1967 and 1971 (respectively, $\epsilon_2$ and $\epsilon_4$).
+
+```{r}
+wheaton.model <- '
+  # latent variables
+    Alien67 =~ 1.0*Anomie67 + 0.833*Powerless67 # 1.
+    Alien71 =~ 1.0*Anomie71 + 0.833*Powerless71 # 2.
+    SES     =~ 1.0*Education + SEI # 3.
+  # regressions
+    Alien67 ~ SES # 4.
+    Alien71 ~ Alien67 + SES # 5.
+  # consrained variances
+    Anomie67 ~~ theta1*Anomie67 # 6.
+    Anomie71 ~~ theta1*Anomie71 # 6.
+    Powerless67 ~~ theta2*Powerless67 # 7.
+    Powerless71 ~~ theta2*Powerless71 # 7.
+  # correlated residuals
+    Anomie67 ~~ theta3*Anomie71 # 8.
+    Powerless67 ~~ theta3*Powerless71 # 9.
+'
+```
+
+## Estimation
+
+We can now fit the model. Before looking at the results, let's visualise it and confirm that the structure it postulates makes sense:
+```{r, fig.width=12, fig.height=4}
+fit <- sem(wheaton.model, 
+           sample.cov = wheaton.cov, 
+           sample.nobs = 932)
+graph_sem(model=fit, spacing_x=3, rect_height=0.4, ellipse_height=0.5, text_height=2)
+```
+
+## Interpretation
+
+Finally, let's take a look at the results with fitted coefficients:
+```{r}
+summary(fit, standardized = TRUE)
+```
+Firstly, note the model's lack-of-fit test. With $\chi^2=`r round(fit@Fit@test$standard$stat,3)`$ with $\mathrm{df}=`r fit@Fit@test$standard$df`$, $p\text{-value}=`r round(fit@Fit@test$standard$pvalue,3)`$: there is not sufficient evidence to believe that the data came from a different model from the one fit.
+
+Some conclusions assuming causation follow.
+
+### Latent variables:
+
+* Higher SES, constructed to positively affect educational attainment, turns out to positively affect the SEI.
+
+### Regressions:
+
+* Higher SES strongly reduces alienation in both years.
+* Higher alienation in 1967 results in higher alienation in 1971.
+
+### Covariances:
+
+* After accounting for the above effects and other effects in the model (e.g., the fixed relationships between Alienation and Anomie and Powerlessness), an individual's residual anomie in 1967 is strongly positively correlated with their anomie in 1971 and analogously with powerlessness.
+

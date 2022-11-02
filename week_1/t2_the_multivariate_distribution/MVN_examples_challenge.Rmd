@@ -1,0 +1,47 @@
+---
+title: "ZZSC5855 --- Multivariate Normal Distribution"
+author:
+- "Pavel Krivitsky"
+- "Deparment of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+
+```{r, message=FALSE}
+library(here)
+library(mvtnorm)
+library(GGally)
+library(MVN)
+library(dplyr)
+library(readr)
+```
+
+
+
+# Challenges
+
+Now, consider an extract from a dataset containing a number of chemical properties of Portuguese Vinho Verde wines and their quality, taken from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Wine+Quality). Eleven properties of a wine were measured, along with a subjective quality score. This was done for red and for white wines. For the purposes of this exercise, we will focus on the following 7 variables:
+* `fixed acidity`
+* `volatile acidity`
+* `free sulfur dioxide`
+* `total sulfur dioxide`
+* `density`
+* `pH`
+* `sulphates`
+
+Let's explore the data and see if any variables would need to be transformed for multivariate analysis:
+```{r}
+wine <- read_csv(here("datasets","winequality-red.extract7.csv"))
+```
+
+### Task 1: Make a pairwise plot of this dataset and identify which variables may deviate from normality. Perform the hypothesis tests. Do the results agree?
+
+
+### Task 2: Find an appropriate transformation for these variables, and check that they are now normal.*Note: There is no unique correct answer.
+
+

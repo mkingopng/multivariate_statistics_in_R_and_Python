@@ -1,0 +1,54 @@
+---
+title: "ZZSC5855 --- Partial Correlations"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+
+```{r, message=FALSE}
+library(here)
+library(readr)
+library(dplyr)
+library(GGally)
+library(ggm)
+```
+
+
+# Challenge
+
+Recall the Portuguese red wines data:
+```{r}
+red.t <- read_csv(here("datasets","winequality-red.extract7.csv")) %>% mutate(`log sulphates`=log(`sulphates`), `root4 free sulfur dioxide` = (`free sulfur dioxide`)^(1/4), `root4 total sulfur dioxide` = (`total sulfur dioxide`)^(1/4), `log fixed acidity`=log(`fixed acidity`), `log volatile acidity`=log(`volatile acidity`), .keep="unused")
+ggpairs(red.t)
+```
+
+Consider the variables `pH`, `log fixed acidity` and `log volatile acidity`.
+
+### Task 1: Calculate the correlation between pH and log volatile acidity and their partial correlation given log fixed acidity. How are they different? Interpret the partial correlation and the difference between correlation and partial correlation in this case.
+
+#### Solution:
+```{r}
+i <- c(2,6,7) # Indices of variables of interest.
+(R <- cor(red.t[i]))
+pcor(c(1,3,2), R)
+# Alternatively,
+R <- cor(red.t)
+pcor(c(2,7,6), R)
+```
+After adjusting for fixed acidity, the correlation between pH and volatile acidity is about `r pcor(c(2,7,6), R)`---much weaker than the raw correlation `r R[2,7]`, suggesting that fixed acidity explains the most of their common variation.
+
+### Task 2: Calculate the partial correlation between density and log sulphates content, given free and total sulphur dioxide.
+
+#### Solution:
+```{r}
+R <- cor(red.t)
+pcor(c(1,3, 4,5), R)
+```
+

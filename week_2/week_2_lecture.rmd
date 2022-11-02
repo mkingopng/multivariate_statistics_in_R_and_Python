@@ -1,0 +1,114 @@
+---
+title: "week 2 lecture"
+output: html_document
+---
+
+
+```{r}
+scl2 <-qchisq(0.90, p)/n
+```
+
+
+question 4
+
+tests of multivari
+
+
+```{r}
+library(here)
+library(readr)
+library(dplyr)
+library(ergm)
+library(MVN)
+bridges <- read_csv(here("datasets", ))
+()
+```
+
+Hotelling $t^2$
+
+```{r}
+
+```
+
+# question 2
+
+```{r}
+
+```
+
+# question 3
+```{r}
+
+```
+
+
+# question 4
+
+```{r}
+
+```
+
+
+# question 5
+```{r}
+
+```
+
+# question 6
+
+```{r}
+
+```
+
+
+# Question 7
+
+```{r}
+
+```
+
+
+# Question 9:
+
+```{r}
+
+```
+
+# Question 10:
+always true
+```{r}
+
+```
+
+# question 1
+
+```{r}
+
+```
+
+# question 2
+
+```{r}
+
+```
+
+# question 3
+
+```{r}
+
+```
+
+# question 4
+
+```{r}
+
+```
+
+# question 5
+
+```{r}
+
+```
+
+# question 6
+

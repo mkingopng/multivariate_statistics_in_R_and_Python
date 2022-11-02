@@ -1,0 +1,119 @@
+---
+title: "ZZSC5855 --- Multivariate LM and MANOVA Example"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(GGally)
+library(dplyr)
+library(readr)
+library(purrr)
+```
+
+# Fitness Club Example
+
+Three physiological and three exercise variables were measured on twenty middle aged men in a fitness club. Canonical correlation is used to determine if the physiological variables are related in any way to the exercise variables. 
+
+## Data
+
+```{r}
+'weight waist pulse chins situps jumps
+   191  36  50   5  162   60
+   189  37  52   2  110   60
+   193  38  58  12  101  101
+   162  35  62  12  105   37
+   189  35  46  13  155   58
+   182  36  56   4  101   42
+   211  38  56   8  101   38
+   167  34  60   6  125   40
+   176  31  74  15  200   40
+   154  33  56  17  251  250
+   169  34  50  17  120   38
+   166  33  52  13  210  115
+   154  34  64  14  215  105
+   247  46  50   1   50   50
+   193  36  46   6   70   31
+   202  37  62  12  210  120
+   176  37  54   4   60   25
+   157  32  52  11  230   80
+   156  33  54  15  225   73
+   138  33  68   2  110   43' %>%
+textConnection() %>% read.table(header=TRUE) -> fitness
+
+fitness
+
+```
+## Exploratory data analysis
+
+```{r}
+summary(fitness)
+ggpairs(fitness)
+```
+The data do have some outliers.
+
+## Multivariate linear model analysis
+### Estimation
+```{r}
+class(fitness.mlm <- lm(cbind(chins,situps,jumps)~waist+pulse+weight, data=fitness))
+summary(fitness.mlm)
+coef(fitness.mlm) # Now a p by k matrix.
+vcov(fitness.mlm) # Now a p*k by p*k matrix.
+estVar(fitness.mlm) # Now a p by p matrix.
+resid(fitness.mlm) # Now a p-column matrix.
+fitted(fitness.mlm) # Now a p-column matrix.
+```
+
+### Hypothesis testing
+```{r}
+# ? anova.mlm for options
+anova(fitness.mlm) # Pillai's trace by default
+anova(fitness.mlm, test="Wilks")
+anova(fitness.mlm, test="Hotelling-Lawley")
+anova(fitness.mlm, test="Roy")
+# Sphericity test also possible---see help.
+
+ # Test the effect of weight in the presence of the others:
+fitness.mlm0 <- lm(cbind(chins,situps,jumps)~waist+pulse, data=fitness) 
+anova(fitness.mlm, fitness.mlm0)
+```
+### Diagnostics
+```{r, eval=FALSE}
+plot(fitness.mlm) # Error: not implemented.
+```
+Pairwise plots of all residuals:
+```{r}
+ggpairs(as_tibble(resid(fitness.mlm))) # Note: type="pearson" doesn't work as of R 3.6!
+```
+
+Make our own Pearson residuals:
+```{r}
+# Residual standard deviations: square root of the diagonal of the estimated covariance of residuals:
+sds <- fitness.mlm %>% estVar %>% diag %>% sqrt
+PR <- sweep(resid(fitness.mlm), 2, sds, `/`)
+ggpairs(as_tibble(PR))
+```
+
+Related: decorrelate the residuals:
+```{r}
+# Inverse of the Cholesky decomposition (square root) of the estimated variance-covariance matrix of the residuals
+Uinv <- estVar(fitness.mlm) %>% chol %>% solve
+(PRI <- resid(fitness.mlm)%*%Uinv) %>% cor %>% zapsmall # Now close to identity matrix.
+ggpairs(as_tibble(PRI))
+```
+
+Residuals vs. fitted:
+```{r}
+# I.e., join the predictors with the residuals, and plot the predictors horizontally and residuals vertically:
+pairs(as_tibble(cbind(PR,fitted(fitness.mlm))), horInd=1:3,verInd=4:6,
+panel=function(x,y,...){abline(h=0,col="gray");points(x[abs(y)<2],y[abs(y)<2]);if(any(abs(y)>=2)) text(x[abs(y)>=2],y[abs(y)>=2],labels=which(abs(y)>=2));lines(lowess(x,y),col="red")})
+```
+

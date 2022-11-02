@@ -1,0 +1,60 @@
+---
+title: "ZZSC5855 --- Multivariate LM and MANOVA Example"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(GGally)
+library(dplyr)
+library(readr)
+library(purrr)
+```
+
+# Challenge
+
+Recall the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
+
+`brand`
+: Pizza brand (class label)
+
+`id`
+: Sample analysed
+
+`prot`
+: Amount of protein per 100 grams in the sample
+
+`fat`
+: Amount of fat per 100 grams in the sample
+
+`ash`
+: Amount of ash per 100 grams in the sample
+
+`sodium`
+: Amount of sodium per 100 grams in the sample
+
+`carb`
+: Amount of carbohydrates per 100 grams in the sample
+
+`cal`
+: Amount of calories per 100 grams in the sample
+
+
+```{r}
+pizza <- read_csv(here("datasets","pizza.csv"))
+ggpairs(pizza, mapping=aes(col=brand, alpha=0.3))
+```
+
+### Task 1: We had conducted a MANOVA test to determine if different brands have different measurements. That test assumes equal variances. Are they equal?
+
+Hint: Use `boxM` from the `heplots` package.
+
+

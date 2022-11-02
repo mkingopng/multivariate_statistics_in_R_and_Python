@@ -1,0 +1,50 @@
+
+
+```{r}
+data(iris)
+iris
+```
+
+
+```{r}
+summary(iris)
+```
+
+```{r}
+# Column means:
+colMeans(iris[,-5])
+```
+```{r}
+# Column standard deviations:
+apply(iris[-5], 2, sd)
+```
+
+```{r}
+# Column 95th %iles:
+apply(iris[-5], 2, quantile, 0.95) # This evaluates: quantile(x, 0.95) for x each column in turn.
+```
+```{r}
+# Variance-covariance matrix
+cov(iris[,-5])
+```
+
+```{r}
+# Correlation matrix
+cor(iris[,-5])
+```
+
+```{r}
+library(magrittr)
+library(purrr)
+library(ggplot2)
+library(GGally)
+```
+```{r}
+
+```
+```{r}
+# aes() here is optional, telling it to colour-code in accodance with species, and using transparency (alpha).
+ggpairs(iris, aes(colour=Species, alpha = 0.7))
+```
+
+

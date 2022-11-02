@@ -1,0 +1,32 @@
+---
+title: "matrix algebra"
+output: html_notebook
+---
+# Vectors and matrices
+As a shorthand notation, we shall be using $\in \mathcal{M}_{p,n}$ to indicate that $X$ is a matrix with $p$ rows and $n$ columns.
+A notation $x \in \mathbb{R}^n$ will be used to indicate that $x$ is a $n$-dimensional *column* vector. Of course, if $x \in \mathbb{R}^n$, it also means that $x \in \mathcal{M}_{n,1}$. *Transposition* will be denoted by $T$. After a transposition, from a matrix $X \in M_{p,n}$ we get a new matrix $X^{T} \in \mathcal{M}_{n,p}$. In particular, from a column vector $x \in \mathbb{R}^n$ we arrive, after a transposition, to a row a vector $x^T \in \mathca{M}_{n,p}$. It is well known that multiplication of a matrix (vector) with a scalar means multiplication of each of the elements of the matrix (vector) with that scalar. Also, two matrices (vectors) of the same dimension can be added (subtracted) and the result is a new matrix (vector) of the same dimension and elements which are the element wise sum (difference) of the elements of the matrices (vectors) to be added (subtracted).
+
+the *euclidian norm* of a vector $x = \begin{pmatrix} x_1 \\ x_2 \\ . \\ . \\ . \\ x_p \end{pmatrix}$ is demoted by $||x||$ and is defined as $||x|| = \dqrt{\sum_{i=1}^{p} x_i^2}$
+
+```{r}
+
+```
+# Inverse Matrices
+
+
+```{r}
+
+```
+# Rank and Orthagonal matrices
+```{r}
+
+```
+# Eigenvalues and Eigenvectors
+```{r}
+
+```
+# Numerical stability and cholesky decomposition
+```{r}
+
+```
+#

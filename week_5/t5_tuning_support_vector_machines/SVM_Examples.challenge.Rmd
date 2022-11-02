@@ -1,0 +1,70 @@
+---
+title: "ZZSC5855--- Support Vector Machines"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(GGally)
+library(e1071) # svm()
+library(pROC) # ROC curves
+library(dplyr)
+library(readr)
+```
+
+
+# Challenges
+
+Recall the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
+
+`brand`
+: Pizza brand (class label)
+
+`id`
+: Sample analysed
+
+`prot`
+: Amount of protein per 100 grams in the sample
+
+`fat`
+: Amount of fat per 100 grams in the sample
+
+`ash`
+: Amount of ash per 100 grams in the sample
+
+`sodium`
+: Amount of sodium per 100 grams in the sample
+
+`carb`
+: Amount of carbohydrates per 100 grams in the sample
+
+`cal`
+: Amount of calories per 100 grams in the sample
+
+```{r}
+pizza <- read_csv(here("datasets","pizza.csv")) %>% mutate(brand=factor(brand))
+ggpairs(pizza, mapping=aes(col=brand, alpha=0.3))
+```
+
+### Task 1: Select and tune an SVM for classifying the pizza brand based on measurements. What is its cross-validated accuracy?
+
+
+### Task 2: Use your selected classifier to classify a pizza that has the following properties.
+
+* protein content of 12
+* fat content of 15
+* ash content of 1.5
+* sodium content of 0.6
+* carbohydrate content of 25
+* caloric content of 3
+
+
+

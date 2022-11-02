@@ -1,0 +1,73 @@
+---
+title: "ZZSC5855 --- Multivariate LM and MANOVA Example"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(GGally)
+library(dplyr)
+library(readr)
+library(purrr)
+```
+
+
+# Challenge
+
+Recall the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
+
+`brand`
+: Pizza brand (class label)
+
+`id`
+: Sample analysed
+
+`prot`
+: Amount of protein per 100 grams in the sample
+
+`fat`
+: Amount of fat per 100 grams in the sample
+
+`ash`
+: Amount of ash per 100 grams in the sample
+
+`sodium`
+: Amount of sodium per 100 grams in the sample
+
+`carb`
+: Amount of carbohydrates per 100 grams in the sample
+
+`cal`
+: Amount of calories per 100 grams in the sample
+
+
+We will focus on brand A:
+```{r}
+pizzaA <- read_csv(here("datasets","pizza.csv")) %>% filter(brand=="A") %>% select(-brand)
+```
+
+### Task 1: Fit and diagnose a linear model jointly predicting caloric, ash, and sodium content from fat, protein, and carbohydrate content.
+
+
+### Task 2: Test whether carbohydrate content is predictive of the three response variables (jointly) in the presence of other predictors.
+
+
+### Task 3: Test whether fat content is predictive of the three response variables (jointly) in the presence of other predictors.
+
+
+### Task 4: Now, consider the full dataset, with brands. Use MANOVA to test whether different brands have different population mean measured pizza properties.
+
+```{r}
+pizza <- read_csv(here("datasets","pizza.csv"))
+ggpairs(pizza, mapping=aes(col=brand, alpha=0.3))
+```
+
+

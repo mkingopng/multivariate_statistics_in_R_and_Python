@@ -1,0 +1,122 @@
+---
+title: "ZZSC5855 --- Factor analysis"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(dplyr)
+library(readr)
+# stats is loaded by default
+library(psych)
+library(GGally)
+```
+
+# Socioeconomic Data
+
+Data were collected about five socioeconomic variables for 12 census data in the Los Angeles area. The five variables represent total population, median school years, total unemployment, miscellaneous professional services, and median house value. We will perform a factor analysis on these data and demonstrate maximum likelihood and varimax rotation.
+
+
+## Data
+
+This dataset comprises measurements of five socioeconomic variables for 12 census tracts in the Los Angeles area:
+
+`pop`
+: total population
+
+`school`
+: median school years
+
+`employ`
+: total unemployment
+
+`services`
+: miscellaneous professional services
+
+`house`
+: median household value
+
+```{r}
+socecon <- read.table(here("datasets","factor.dat"), col.names=c("pop","school","employ","services","house"))
+```
+
+## Exploratory data analysis
+
+```{r}
+summary(socecon)
+ggpairs(socecon)
+```
+We do see some deviation from normality, though with a small sample size, it's hard to tell.
+
+## Factor analysis
+```{r}
+(socf1stats <- factanal(socecon, 1))
+```
+
+With a small $p$-value, the $\chi^2$ test tells us that there **is** sufficient evidence to believe that additional factors are needed to explain the correlations among these variables.
+
+```{r}
+(socf2stats <- factanal(socecon, 2))
+```
+We see two factors, the first one having positive loadings on house, school, and services (with modest weight on unemployment), and the second factor on population and unemployment (with modest weight on services). This suggests that the first factor is the wealth of the community and the second factor is its population.
+
+The $\chi^2$ test tells us that there **is not** sufficient evidence to believe that additional factors are needed to explain the correlations among these variables.
+
+We can't fit a model with 3 factors:
+```{r, error=TRUE}
+(socf3stats <- factanal(socecon, 3)) # Error: too many factors for the number of variables.
+```
+This is not surprising as the number of parameters in the model will exceed the number of elements in $\varSigma$ ($\frac{1}{2}[(p-k)^{2}-p-k]=-2$).
+
+Using `psych`, we fit a model with one factor: (Note that it has a different default method, so we specify the MLE/VariMax combination explicitly.)
+```{r}
+(socf1 <- fa(socecon, 1, fm="ml", rotate="varimax")) # Other methods also possible.
+plot(socf1)
+```
+It gives us more output, but the factor loadings (`ML`), the communalities (`h2`) and the uniqunesses (`u2`) are the same to rounding error.
+
+It also gives us several variants of a test of the hypothesis that one factor is sufficient, and shows that it is not.
+
+The plot is the load against variable index:
+```{r}
+(socf2 <- fa(socecon, 2, fm="ml", rotate="varimax")) # Other methods also possible.
+plot(socf2)
+```
+We now have two factors. Note that `ML2` corresponds to `Factor1` in `factanal()` and `ML1` to `Factor2`.
+
+The plot gives us the loading on Factor 1 against those on Factor 2, and highlights which variables "belong" to which factor.
+
+We can also fit and plot 3 factors but notice how we are running out of degrees of freedom:
+```{r}
+(socf3 <- fa(socecon, 3, fm="ml", rotate="varimax")) # Works but complains.
+plot(socf3)
+```
+
+Package `psych`'s `fa.parallel()` can also be used to quickly estimate a good number of factors using an analogue of the Kaiser's rule:
+```{r}
+fa.parallel(socecon, fm="ml")
+```
+Notice that we do not specify the rotation method: all possible rotations have the same goodness of fit.
+
+## Extracting results
+
+You can use the `unclass()` function to extract factor analysis information from the fit results:
+
+```{r, eval=FALSE}
+# Contents of a factanal object:
+unclass(socf2stats)
+```
+
+```{r, eval=FALSE}
+# Contents of an fa object:
+unclass(socf2)
+```
+

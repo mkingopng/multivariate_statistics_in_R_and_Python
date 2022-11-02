@@ -1,0 +1,208 @@
+---
+title: "Using R with RStudio"
+output: html_notebook
+---
+# Purpose
+To provide you with a guide to R and RStudio installation, introducing R
+language and its use for data analysis.
+
+## Activity instructions
+Watch the following videos and read the content.
+
+# R with RStudio and Rmarkdown
+<img src="o_week/resources/r_logo.png"/>
+
+RStudio is an integrated development environment (IDE) for R. It includes a
+console, syntax-highlighting editor that supports direct code execution, as
+well as tools for plotting, history, debugging and workspace management.
+R and RStudio are open-source and free to use.
+
+You should set up your R environment as soon as possible.
+You need to be ready to use R straight from the start of the course and will be
+required to perform a basic data and regression analysis using R in the first
+assessment in Week 1.
+Rmarkdown is a markup language, which is an excellent tool for report writing
+with R.
+
+# Installing R and RStudio
+You can download RStudio suitable for your system for free from its official
+website.
+The Ed Platform in which you will be completing most of your work also has an
+RStudio emulator and you can use the emulator to complete the R demonstrations
+and challenges throughout the course.
+
+There are numerous online video tutorials devoted to R and RStudio installation.
+You might like to start here:
+
+[Installing R & RStudio](o_week_vidz/Download and Install R and RStudio   R Tutorial 12  MarinStatsLectures.mp4)
+
+# Using R
+As an introduction to using R, watch the following video tutorial on some basic
+arithmetic in R:
+
+[Getting started with R, Part 1](o_week_vidz/Getting started with R Basic Arithmetic and Coding in R  R Tutorial 13  MarinStatsLectures.mp4)
+
+There are some many videos in this series from MarinStatsLectures you are
+welcomed to use to supplement the materials provided in this course.
+
+[R for Data Science:](https://r4ds.had.co.nz/)
+
+For those who are new to R, you will find the book [R for Data Science](../textbooks/R%20for%20Data%20Science.pdf) by Garrett
+Grolemund and Hadley Wickham a useful introduction on how to do data science
+using R.
+R for Data Science will show you how to get your data into R, get it into the
+most useful structure, transform it, visualise it, model it, and communicate it.
+The online version of the book is free to use and is licensed under the
+Creative Commons Attribution-NonCommercial-NoDerivs 3.0 License
+(CC BY-NC-ND 3.0 US).
+
+Also, this video series from LinkedIn learning is a great reference for those
+new to R. You will need your UNSW details to log in and view the videos:
+[LinkedIn Learning](https://www.linkedin.com/learning/learning-r-2/r-for-data-science?u=2087740)
+
+# Rmarkdown
+Rmarkdown is a markup language, which is an excellent tool for report writing
+with R.
+
+[](o_week_vidz/How to Author R Markdown Reports.mp4)
+
+## how to author RMarkdown reports
+You may like to consider completing this free online short course from DataCamp
+for [an introduction to Rmarkdown](https://www.datacamp.com/courses/reporting-with-r-markdown)
+
+## Basic commands
+Use the below R reference guide for a short overview of the most important
+functions you need to be familiar with from the start of this course.
+
+### Function:
+Function in R: funcname(input1, input2).
+
+To obtain help about a given function type: ?funcname
+
+## Combine values into a vector or list
+```{r}
+x<-c(1,0,5,4,7,9)
+x
+```
+
+```{r}
+is.vector(x)
+```
+
+```{r}
+y <- seq(1, 3, length=length(x))
+y
+```
+
+```{r}
+is.vector(y)
+```
+# Length of an Object
+
+```{r}
+length(x)
+```
+
+```{r}
+length(y)
+```
+# Arithmetic Operators
+```{r}
+x+y
+```
+```{r}
+x*y
+```
+```{r}
+x/y
+```
+```{r}
+format(x^y,digits=3,scientific=False)
+```
+# List & Remove Objects
+```{r}
+ls()
+```
+
+```{r}
+rm(x,y)
+ls()
+```
+# matrices
+```{r}
+x <- matrix(data=1:16, nrow=4, ncol=4)
+x
+```
+
+```{r}
+matrix(data=1:16,nrow=4,ncol=4, byrow=TRUE)
+```
+
+# Indexing Data
+```{r}
+dim(x)
+```
+```{r}
+x[1,1]
+```
+```{r}
+x[1:2,1]
+```
+```{r}
+x[-c(1,3)]
+```
+# element wise computation on the matrix elements
+```{r}
+sqrt(x)
+```
+```{r}
+x^2
+```
+
+# matrix multiplication
+```{r}
+x%*%x
+```
+```{r}
+t(x)%*%x
+```
+```{r}
+diag(x)%*%x
+```
+# apply function
+```{r}
+x <- matrix(data=1:16, nrow=4, ncol=4)
+apply(x,1,mean)
+```
+```{r}
+apply(x,2,mean)
+```
+# defining functions
+```{r}
+myfun<-function(x)
+        {
+out<-sum(x)+0.1
+out
+}
+x <- matrix(data=1:16, nrow=4, ncol=4)
+apply(x,1,myfun)
+```
+# graphics
+```{r}
+x<-rnorm(100)
+y<-rnorm(100)
+plot(x,y,xlab="x-axis label", ylab="y-axis label", main="Plot of X vs Y")
+```
+# saving a plot ina png file
+```{r}
+png("Figure.png")
+plot(x,y,xlab="x-axis label", ylab="y-axis label", main="Plot of X vs Y")
+dev.off()
+```
+
+```{r}
+x <- seq(-10, 10, length= 30)
+f<-outer(x,x,function(x,y) {r <- sqrt(x^2+y^2); 10 * sin(r)/r})
+persp(x,x,f,theta = 135, phi = 30, col = "green3", scale = FALSE,
+      ltheta = -120, shade = 0.75, border = NA, box = T)
+```

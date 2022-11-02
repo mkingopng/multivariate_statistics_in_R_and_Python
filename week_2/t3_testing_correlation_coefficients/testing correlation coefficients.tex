@@ -1,0 +1,80 @@
+%! Author = noone
+%! Date = 31/10/22
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+
+% Document
+\begin{document}
+
+Usual correlation coefficients
+
+When considering the distribution of a particular correlation coefficient
+ the problem becomes bivariate because only the variables  are involved.
+Direct transformations with the bivariate normal can be utilised to derive the
+exact distribution of under the hypothesis .
+It turns out that in this case the statistic
+
+and tests can be performed by using the tables of the $t$-distribution.
+For other hypothetical values the derivations are more painful.
+There is one most frequently used approximation that holds no matter what the
+true value of  is.
+We shall discuss it here.
+Consider Fisher's $Z$ transformation .
+Under the hypothesis  it holds:
+
+
+In particular, in the most common situation, when one would like to test
+versus  one would reject  at5  significance level if
+
+Partial correlation coefficients
+
+Coming over to testing partial correlations not much has to be changed.
+Fisher's $Z$ approximation can be used again in the following way: to test  versus  we construct  and . Asymptotically  holds. Hence, test statistic to be compared with significance points of the standard normal is now :
+
+. (Notice that  is the number of variables being conditioned on.)
+
+For , we can also use the (more exact) $t$-test,
+
+Multiple correlation coefficients
+
+It turns out that under the hypothesis  the statistic .
+Hence, when testing significance of the multiple correlation, the rejection region would be  for a given significance level αα.
+
+Remark 2.1. This expression should be familiar in the context of the ANOVA $F$-test;
+there, $p$ would be the number of predictors, and the denominator degrees of
+freedom would be $n-p-1$, with the $-1$ being for the intercept.
+
+Check your understanding
+
+Complete the below exercises to check your understanding of concepts presented so far.
+
+1. Suppose  and
+
+Determine:
+
+a) the distribution of
+
+b) the conditional mean and variance of
+
+c) the partial correlation coefficients
+
+d) the multiple correlation between . Compare it to  and comment
+
+e) Justify that  is independent of .
+
+2. .
+
+a) Find the distribution of .
+
+b) Find a vector  such that   and  are independent.
+
+3. Suppose that you observe two independent bivariate samples:  for  and, independently, .
+Describe how you would use the Fisher's $Z$ transformation to test the null hypothesis , where  is the correlation between  and  and similarly for $Y$.
+
+
+
+\end{document}

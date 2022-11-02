@@ -1,0 +1,223 @@
+---
+title: "ZZSC5855 --- Copula Methods"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+# Packages
+```{r}
+library(here)
+library(readr)
+library(dplyr)
+library(purrr)
+library(reshape2)
+library(copula)
+library(GGally)
+library(stats4) # mle()
+library(Rsolnp)
+```
+
+
+# Examples of copula functions
+
+Useful function for plotting copulae:
+```{r}
+copplot <- function(cop){
+  par(mfrow=c(2,2), mar=c(2,2,4,1)+0.1)
+  persp(cop, pCopula, main="C(u1,u2)", xlab="u1", ylab="u2", zlab="C(u,v)")
+  persp(cop, dCopula, main="c(u1,u2)", xlab="u1", ylab="u2", zlab="c(u,v)")
+  contour(cop, pCopula, main="C(u1,u2)", xlab="u1", ylab="u2")
+  contour(cop, dCopula, main="c(u1,u2)", xlab="u1", ylab="u2")
+  title(main=describeCop(cop, "long"), outer=TRUE, line=-2)
+}
+```
+
+Here are some common copulae in 2 dimensions:
+```{r}
+copplot(indepCopula(2))
+copplot(normalCopula(param=0.9, dim=2))
+copplot(tCopula(param=0.9, dim=2))
+copplot(gumbelCopula(param=2, dim=2))
+```
+
+# Microwave Ovens Example
+
+## Data
+
+Recall the data about microwave ovens and their radiation when open as opposed to closed. We noted that the distributions were far from normal, and we therefore transformed them by taking the fourth root. Copula models allow us to model them directly.
+
+Load the data:
+```{r}
+ovens <- read_csv(here("datasets","ovens.csv"))
+ggpairs(ovens)
+```
+
+## Gaussian Copula
+
+### Using empirical CDF
+
+We begin by obtaining the empirical quantiles of the observations:
+```{r}
+head(ovensU <- pobs(ovens)) # Empirical quantiles of observations
+```
+
+A Gaussian copula can be fit using the `fitCopula()` function, with `normalCopula(dim=2)` specifying a 2-dimensional Gaussian copula. Method `irho` fits by trying to match the empirical correlation to the one induced by copula.
+```{r}
+(e_fit <- fitCopula(normalCopula(dim=2), ovensU, method="irho"))
+```
+
+```{r}
+head(ovensN <- matrix(qnorm(ovensU), ncol=2)) # Map the empirical quantiles onto normal quantiles
+cor(ovensN)
+```
+Notice that the parameter estimates are the same.
+
+### Using Gamma margins
+
+Now, let's suppose that we think that microwave radiation measurements are gamma-distributed. How do we incorporate this assumption? For this, we have `mvdc`, which lets us do precisely that, specifying the copula, the margin families, and their parameters. (Note that we could mix the families, if we wanted to.)
+
+We then use the `fitMvdc()` function, specifying the initial parameter values. This produces a parametric copula fit, including confidence intervals, and a fitted copula model from which we can simulate.
+```{r}
+normGGc <- mvdc(normalCopula(dim=2), margins=c("gamma","gamma"),
+                paramMargins = list(list(shape=1, rate=1),
+                                    list(shape=1, rate=1)))
+(g_fit <- fitMvdc(as.matrix(ovens), normGGc, start = c(
+1,1, # First Gamma
+1,1, # Second Gamma
+0 # Copula correlation
+)))
+summary(g_fit)
+confint(g_fit)
+normGGc_fitted <- g_fit@mvdc
+                                      
+# Simulate another dataset from the fit:
+(rovens <- as.data.frame(rMvdc(nrow(ovens), normGGc_fitted)))
+names(rovens) <- names(ovens)
+ggpairs(as.data.frame(rovens))
+
+# Bigger dataset:
+(rovens <- as.data.frame(rMvdc(1000, normGGc_fitted)))
+names(rovens) <- names(ovens)
+ggpairs(as.data.frame(rovens))
+```
+
+# Stocks example
+
+## Data
+
+Recall that the following stocks were considered:
+
+* IBM (IBM)
+* Microsoft (MSFT)
+* British Petroleum (BP)
+* Coca-Cola (KO)
+* Duke Energy (DUK)
+
+We loaded the data, combined them, and sorted them by date. This is all data management, but I suggest looking up help for each of the functions here to see what they do.
+```{r, data}
+symbols <- c("IBM", "MSFT", "BP", "KO", "DUK")
+path <- here("datasets","stocks")
+
+readstock <- function(symbol, path){
+    file.path(path, paste0(symbol,".csv")) %>%
+        read_csv() %>% select(Date, `Adj Close`) %>%
+        set_names(c("Date", symbol))
+}
+stocks <- symbols %>% map(readstock, path=path) %>% reduce(left_join, by="Date") %>% arrange(Date)
+stocks %>% melt(id="Date", variable.name="Stock", value.name="Value") %>% ggplot(aes(x=Date, y=Value, colour=Stock, group=Stock)) + geom_line()
+```
+
+While we could work with the daily return on investment, $$=\frac{\text{Price today}}{\text{Price yesterday}}-1,$$ it is more convenient to work on log scale: $$\log \frac{\text{Price today}}{\text{Price yesterday}}.$$
+Then,
+$$\log \frac{\text{Price today}}{\text{Price 2 days ago}} = \log \frac{\text{Price today}}{\text{Price yesterday}} + \log \frac{\text{Price yesterday}}{\text{Price 2 days ago}},$$
+so we can model log-returns over long periods as sums of log-returns over short periods. We therefore calculated log-daily returns:
+```{r, returns}
+returns <- stocks %>% select(-Date) %>% map(~log(./lag(.))) %>% as_tibble %>% na.omit
+ggpairs(returns)
+```
+
+As is often the case for stock returns, they are correlated and there are outliers  and long tails, even on the log scale. We therefore converted the observations to quantiles, while mostly preserving the correlations:
+```{r, uniformed}
+returnsU <- pobs(returns) # Empirical quantiles of observations
+ggpairs(as_tibble(returnsU))
+```
+
+## Fitting and simulation
+
+We used a *Multivariate $t$-Copula* with an unstructured (`dispstr="un"`) covariance matrix. Other options would have included exchangeable---which would have assumed that all pairwise correlations are equal. We also specified maximum likelihood to be used. We then simulated from the fitted copula and plotted it.
+```{r, copula-sim}
+(t_fit <- fitCopula(tCopula(dim=ncol(returnsU), dispstr="un"), returnsU, method="ml"))
+# NB: We can use getSigma() to extract the estimated correlation matrix:
+getSigma(t_fit@copula)
+# We then took our fitted model, and simulated the empirical quantiles.
+simreturnsU<- rCopula(100000,t_fit@copula) %>% as_tibble %>%  set_names(symbols)
+
+# This is a function sorely needed in the copula package: inverse of pobs.
+qobs <- function(p, x, lower.tail=FALSE, log.p=FALSE){
+    p <- cbind(p)
+    x <- cbind(x)
+    if(ncol(p)!=ncol(x)) stop("Dimension of pseudo observation does not match the dimension of the original distribution.")
+    if(log.p) p <- exp(p)
+    if(lower.tail) p <- 1-p
+    sapply(seq_len(ncol(p)), function(i) quantile(x[,i], probs=p[,i]))
+}
+
+# Map returns back to the original scale:
+simreturns <- qobs(simreturnsU, returns) %>% as_tibble %>% set_names(symbols)
+pairs(simreturns, pch=".")
+```
+
+## Goodness-of-fit testing
+
+We can also check whether this $t$-Copula does a good job representing the correlation among the stocks. The function `gofCopula()` provides several tests for this. Note that it currently has a limitation that it cannot handle non-integer degrees of freedom, so we are going to extract them from the fit and round.
+
+This procedure is very time-consuming, so we'll set the simulation size to only 40.
+```{r, copula-gof}
+gofCopula(tCopula(dim=ncol(returnsU), dispstr="un", df=round(t_fit@copula@parameters[11]), df.fixed=TRUE), returns, N=40, estim.method="ml")
+```
+Based on the high $p$-value, we seem to be OK.
+
+## Portfolio returns
+
+We can now try different portfolio strategies.
+
+### Equally weighted portfolio
+
+```{r, eq-port}
+eq_rets <- rowMeans(exp(simreturns))-1 # I.e., rowwise sums divided by 5.
+m.equal <- mean(eq_rets)
+sd.equal <- sd(eq_rets)
+```
+
+Suppose that we invest $1, splitting it iequally among the stocks, so $0.20 into each stock. Then, average daily return will be about $`r m.equal`$ (with standard deviation $`r sd.equal`$). We expect to lose money $`r mean(eq_rets<0)`$ of the days. And, we expect to lose more than 1% $`r mean(eq_rets< -.01)`$ of the days.
+
+We can also plot the density of daily returns:
+```{r, eq-port-plot, fig.align="center", fig.height=3}
+qplot(eq_rets, geom="density")+xlab("Daily portfolio return")
+```
+
+### A better portfolio
+
+Some stocks are correlated, so we might want to try hedging. Can we get the $`r m.equal`$ return more reliably?
+
+Here, we use constrained optimisation from a package for constrained optimisation. (THIS IS NOT EXAMINABLE!)
+```{r, best-port}
+rets <- function(w) rowSums(sweep(exp(simreturns), 2, w, `*`))-1
+
+eqfun <- function(w) c(mean(rets(w))-m.equal, sum(w)-1)
+objfun <- function(w) sd(rets(w))
+
+best_w <- gosolnp(fun=objfun, eqfun=eqfun, eqB=c(0,0), LB=rep(0,5), UB=rep(1,5), n.sim=100)$pars
+names(best_w) <- symbols
+best_rets <- rets(best_w)
+best_w
+```
+
+Notice that only one of IBM and MSFT taken. The average daily return is still $`r mean(best_rets)`$, but the standard deviation is now about $`r sd(best_rets)`$, and the probabilities of loss have decreased accordingly to $`r mean(best_rets<0)`$ and $`r mean(best_rets< -.01)`$, respectively.
+
+

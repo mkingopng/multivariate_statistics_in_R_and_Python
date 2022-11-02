@@ -1,0 +1,88 @@
+%! Author = noone
+%! Date = 31/10/22
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+
+% Document
+\begin{document}
+
+\section{Multiple correlation}\label{sec:multiple-correlation}
+Recall our discussion at the end of slide \("\)Properties of multivariate
+norma\(l"\), for the best prediction in mean squares sense in case of
+multivariate normality: If we want to predict a random variable $Y$ that is
+correlated with pp random variables (predictors)  by trying to minimise the
+expected value  the optimal solution (i.e. the regression function) was
+
+When the joint $(p+1)$-dimensional distribution of $Y$ and $X$ is normal
+this function was linear in $X$.
+Given a specific realisation $x$ of $X$ it was given by  where  is the
+covariance matrix of the vector  is the vector of Covariances of $Y$ with .
+The vector  was the vector of the regression coefficients.
+
+Now, let us define the multiple correlation coefficient between the random
+variable $Y$ and the random vector X∈RpX∈Rp to be the maximum correlation
+between $Y$ and any linear combination .
+This makes sense to look at the maximal correlation that we can get by
+trying to predict $Y$ as a linear function of the predictors.
+The solution to this which also gives us an algorithm to calculate (and
+estimate) the multiple correlation coefficient is given in the next lemma.
+Multiple correlation coefficient as ordinary correlation coefficient of
+transformed data
+
+Lemma 2.1.
+The multiple correlation coefficient is the ordinary correlation
+coefficient between $Y$ and (I.e., .))
+
+Coefficient of Determination From Lemma 2.1 the maximum correlation between
+$Y$ and any linear combination  is  is
+This is the multiple correlation coefficient.
+Its square $R^2$ is called coefficient of determination.
+Having in mind that  we see that
+
+
+If $\Sigma = \begin{pmatrix} \sigma_{Y}^{2} & \sigma_{0}^{T} \\ \sigma_{0} & C \end{pmatrix} = \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix}$
+is the partitioned covariance  matrix of the $p+1$-dimensional vector $(Y,X)T$
+then we know how to calculate the MLE of $\Sigma$ by $\hat{\Sigma} = \begin{pmatrix} \hat{\Sigma}_{11} & \hat{\Sigma}_{12} \\ \hat{\Sigma}_{21} & \hat{\Sigma}_{22} \end{pmatrix}$
+so the MLE of $R$ would be $$
+
+
+\Section{Interpretation of $R$}
+At the end of slide \("\)Properties of multivariate normal\("\), we derived the
+minimal value of the mean squared error when trying to predict $T$ by a linear
+function of the vector $X$.
+It is achieved when using the regression function and the value itself was
+$\sigma_{Y}^{2}(1-R^2)$
+The latter value can also be expressed by using the value of $R$.
+It is equal to $\sigma_{Y}$.
+
+Thus, our conclusion is that when $R^2 = 0$ there is no predictive power at all.
+In the opposite extreme case, if $R^2 = 1$, it turns out that $Y$ can be
+predicted without any error at all (it is a true linear function of $X$).
+
+\section{Calculation of the coefficient of determination}\label{sec:calculation-of-the-coefficient-of-determination}
+Remark about the calculation of $R^2$
+
+Sometimes, the correlation matrix only may be available.
+It can be shown that in that case the relation
+is the upper left-hand corner of the inverse of the correlation matrix
+ determined from $\Sigma$
+
+The following proof is not examinable.
+
+We note that the relation  holds with
+One can use 2.2 to calculate $R^2$ by first calculating the right hand side in 2.2.
+To show Equality 2.2 we note that
+
+
+But , the entry in the first row and column of . (Recall from slide \("\)Inverse matrices\("\):
+Since  we see that  holds.
+Therefore .
+
+
+
+
+\end{document}

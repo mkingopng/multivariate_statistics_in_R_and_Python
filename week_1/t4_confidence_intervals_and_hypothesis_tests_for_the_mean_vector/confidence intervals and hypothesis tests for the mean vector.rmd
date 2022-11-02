@@ -1,0 +1,30 @@
+---
+title: "Confidence Intervals and hypothesis tests for the mean vector"
+output: html_notebook
+---
+
+# Hypothesis tests for the multivariate normal mean
+
+
+# Hypothesis tests for the multivariate normal mean continued
+
+# confidence regions for the mean vector and for its components
+
+# comparison of two or more mean vectors
+
+# check your understanding
+
+# Hotellings
+
+# challenge: Hotellings
+
+```{r}
+```
+
+
+```{r}
+
+```
+
+Now, click the **Run** button on the chunk toolbar to [execute](https://www.jetbrains.com/help/pycharm/r-markdown.html#run-r-code) the chunk code. The result should be placed under the chunk.
+Click the **Knit and Open Document** to build and preview an output.

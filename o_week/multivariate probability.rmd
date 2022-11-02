@@ -1,0 +1,39 @@
+---
+title: "Multivariate probability"
+output: html_notebook
+---
+# Joint Marginal and conditional distributions
+optional video: watch the below video for a brief review of multivariate functions
+
+A random vector
+
+$$
+\begin{aligned}
+X &= ( X_1, X_2, X_3 ..., X_p)^T \in \mathbb{R}^p, p \geq 2 \text{jas a joint cdf} \\
+F_{X}(x) &= P(X_1 \leq x_1, X_2 \leq x_2,..., X_p \leq x_p \leq x_p) \\
+&= F_{X} (x_1, x_2,..., x_p) \\
+\end{aligned}
+$$
+
+in the case of a discrete vector of observations $X$ the probability mass function is defined as
+$$P_X(x) = P(X_1 \leq x_1, X_2 \leq x_2,... X_p \leq x_p)$$
+
+if a density $$ exists such that
+$$$$
+then $$ is a continuous random vector witha joint density function of $p$ arguments $$ from (0.12) we see that in this case $$ holds
+
+the marginal density of the first $k < p$ components of the vector $X$ is defined in a natural way as follows:
+
+$$$$
+
+for any other subset of $k < p$ components of hte vector X their marginal cdf and density can be obtained along the same lines. $X_i$ has marginal cdf $$
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+

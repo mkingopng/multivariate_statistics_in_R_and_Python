@@ -1,0 +1,165 @@
+---
+title: "ZZSC5855 --- Support Vector Machines"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(GGally)
+library(e1071) # svm()
+library(pROC) # ROC curves
+library(dplyr)
+library(readr)
+```
+
+# Iris Example
+
+## Data
+
+Recall the Iris dataset:
+```{r}
+data(iris)
+iris
+ggpairs(iris, aes(colour=Species, alpha = 0.3))
+```
+
+We will use it to explore SVMs and tuning.
+
+## Two-class SVM
+
+We will begin by focusing on two classes (virginica and versicolor) and two variables (Sepal Length and Width):
+```{r}
+iris2 <- iris %>% filter(Species!="setosa") %>% select(Species,Sepal.Length,Sepal.Width) %>% mutate(Species=factor(Species))
+plot(iris2[,2:3],col=as.numeric(iris$Species)+2)
+legend("topleft", levels(iris$Species)[-1], fill=3:4, ncol=1)
+```
+Note that `svm()` when classifying requires the response variable to be of type `factor` rather than `character`.
+
+
+Let's try a linear SVM with default settings and map its classification regions:
+```{r}
+svm.linear <- svm(Species~.,data=iris2,kernel="linear")
+plot(svm.linear, data=iris2)
+```
+The separation boundary is linear. (Here, the support vectors are denoted using "X" and point colour identifies the class.)
+
+Now, let's try an RBF SVM with $\gamma=1/d$ (the default):
+```{r}
+svm.radial <- svm(Species~.,data=iris2,kernel="radial")
+plot(svm.radial, data=iris2)
+```
+Observe that the classification boundary is now curved.
+
+Let's try making the RBF decay faster by increasing $\gamma$:
+$\gamma=1$:
+```{r}
+svm.radial1 <- svm(Species~., data=iris2,kernel="radial",gamma=1)
+plot(svm.radial1, data=iris2)
+```
+$\gamma=10$:
+```{r}
+svm.radial10 <- svm(Species~., data=iris2,kernel="radial",gamma=10)
+plot(svm.radial10, data=iris2)
+```
+$\gamma=100$:
+```{r}
+svm.radial100 <- svm(Species~., data=iris2,kernel="radial",gamma=100)
+plot(svm.radial100, data=iris2)
+```
+Eventually, each point becomes an island.
+
+Something similar happens when we make the slack penalty too high:
+$\gamma=1/d$, $C=100$:
+```{r}
+svm.radialC100 <- svm(Species~.,data=iris2,kernel="radial",cost=100)
+plot(svm.radialC100, data=iris2)
+```
+## Tuning the SVM
+Lower $\gamma$ / Lower $C$:
+
+* more like linear SVM
+* few support vectors
+* contiguous predictions
+* higher misclassification rate in-sample
+
+Higher $\gamma$ / Higher $C$:
+
+* prediction regions can have more complex shapes
+    * “islands” in the extreme case
+* many support vectors
+* higher misclassificaton rate out-of-sample (usually)
+    * i.e., overfitting
+
+Here, we have in-sample confusion matrices for: $\gamma=1/d$ and $\gamma=100$:
+```{r}
+table(iris2$Species,fitted(svm.radial))
+table(iris2$Species,fitted(svm.radial100))
+```
+It would seem that the higher slack penalty leads to better classification. But does it?
+
+We can use cross-validation to get a better idea of out-of-sample error rate. Here, we use 10-fold cross-validation, in which the dataset is randomly split into 10 equal-sized parts, and each part takes a turn being predicted from the rest of the dataset.
+
+$\gamma=1/d$:
+```{r}
+summary(svm.radial <- svm(Species~.,data=iris2,kernel="radial", cross=10))
+```
+
+$\gamma=100$:
+```{r}
+summary(svm.radial100 <- svm(Species~.,data=iris2,kernel="radial", gamma=100, cross=10))
+```
+And so, in fact, it's much better not to set $\gamma$ to be too high.
+
+We can automate the tuning over a grid:
+```{r}
+summary(tuned.svm <- tune.svm(Species~.,data=iris2,kernel="radial", gamma = 10^(-1:1), cost = 10^(-1:1)))
+tuned.svm$best.model
+```
+Here, the combination with the smallest error wins. It's stored in the `$best.model` element.
+
+## Multiclass SVM
+
+Multiclass SVMs work as well:
+```{r}
+svm3.radial <- svm(Species~Sepal.Length+Sepal.Width,data=iris,cross=10)
+summary(svm3.radial)
+plot(svm3.radial, data=iris, Sepal.Length~Sepal.Width)
+```
+
+## Prediction
+
+Now, suppose that we have measured a new flower, with Sepal Width of 3.4 and Sepal Length of 6.0. What species is it likely to be?
+
+```{r}
+predict(svm3.radial, newdata=data.frame(Sepal.Width=3.4, Sepal.Length=6.0), decision.values=TRUE)
+```
+
+## ROC curves
+
+Since linear classifier predictors are continuous ($\sum_{j=1}^{n}\alpha_{j}y_{j}(x_{j}'x)$ for SVM), we can use some threshold other than $-b$. This can be useful, in particular, if the prior probability or the cost of misclassifying matters. E.g.,
+```{r}
+hist(y.hat.radial <- c(attr(predict(svm.radial, newdata=iris2, decision.values=TRUE),"decision.values")))
+```
+
+We can use the `pROC` package:
+```{r}
+roc.radial <- roc(iris2$Species=="versicolor", y.hat.radial)
+y.hat.linear <- c(attr(predict(svm.linear, newdata=iris2, decision.values=TRUE),"decision.values"))
+roc.linear <- roc(iris2$Species=="versicolor", y.hat.linear)
+plot(roc.radial, col=2)
+plot(roc.linear, col=3, add=TRUE)
+legend("bottomright",c("RBF SVM", "Linear SVM"),lty=1,col=2:3)
+```
+This is mainly useful when there are two classes.
+
+
+
+

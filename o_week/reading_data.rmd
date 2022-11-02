@@ -1,0 +1,54 @@
+---
+title: "Reading Data"
+output: html_notebook
+---
+# Import and plot your data
+```{r}
+Auto <- read.csv("data/Auto.csv")
+names(Auto)
+## [1] "mpg"          "cylinders"    "displacement" "horsepower"
+## [5] "weight"       "acceleration" "year"         "origin"
+## [9] "name"
+plot(Auto$cylinders,Auto$mpg)
+```
+# step 2: Create a boxplot
+We can use attach() to make the variables available in the data frame available by name. Moreover, as.factor() converts the quantitative variables into qualitative. Therefore, plot() automatically produces boxplots.
+
+```{r}
+attach(Auto)
+cylinders <- as.factor(cylinders)
+plot(cylinders,mpg, col="red", varwidth=T, xlab="cylinders", ylab="MPG")
+```
+# Step 3: Create a histogram
+hist() is used to plot histograms. Instead of frequencies we display probabilities. Note that col=2 is equivalent to col=“red”.
+```{r}
+attach(Auto)
+## The following object is masked _by_ .GlobalEnv:
+##
+##     cylinders
+## The following objects are masked from Auto (pos = 3):
+##
+##     acceleration, cylinders, displacement, horsepower, mpg, name,
+##     origin, weight, year
+hist(mpg, col=2, breaks=15,freq=F)
+```
+# Step 4: Create a scatterplot
+pairs() creates scatterplot matrix. Below we choose only a subset of variables for the scatterplot matrix.
+```{r}
+pairs(~mpg+displacement+horsepower,Auto)
+```
+# Step 5: Summarise your data
+```{r}
+summary(Auto)
+```
+# Summary
+We hope this Orientation Week has provided you with a comfortable but challenging introduction to this course and the broader topic of multivariate analysis and what makes multivariate analysis different. We hope that you’ve begun to connect with your facilitator and peers.
+
+We’ve also refreshed your skills in R and RStudio by setting you a basic data analysis activity to import, analyse and model data to create basic boxplots, histograms and scatterplots, undertaking a basic linear regression analysis in R Studio to determine the relationship between two variables.
+
+You should feel ready and confident to use R and RStudio right from the start of the course.
+
+In Week 1, we will begin with an overview of exploratory methods available for multivariate data, before starting the estimation and inference.
+
+# Self-reflection
+At the end of each week, you will be asked to self-assess and reflect upon your achievement of the weekly learning objectives.

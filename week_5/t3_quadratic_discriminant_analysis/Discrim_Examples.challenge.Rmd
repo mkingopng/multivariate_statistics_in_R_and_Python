@@ -1,0 +1,76 @@
+---
+title: "ZZSC5855 --- Discriminant Analysis"
+author:
+- Pavel Krivitsky
+- Department of Statistics
+- University of New South Wales
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  html_notebook: default
+---
+
+
+# Packages
+```{r}
+library(here)
+library(readr)
+library(MASS) # lda(), qda()
+library(dplyr) # Also, we want select() from here and not MASS, so we load it second.
+library(GGally)
+library(heplots) # boxM
+```
+
+
+# Challenges
+
+Recall the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
+
+`brand`
+: Pizza brand (class label)
+
+`id`
+: Sample analysed
+
+`prot`
+: Amount of protein per 100 grams in the sample
+
+`fat`
+: Amount of fat per 100 grams in the sample
+
+`ash`
+: Amount of ash per 100 grams in the sample
+
+`sodium`
+: Amount of sodium per 100 grams in the sample
+
+`carb`
+: Amount of carbohydrates per 100 grams in the sample
+
+`cal`
+: Amount of calories per 100 grams in the sample
+
+```{r}
+pizza <- read_csv(here("datasets","pizza.csv"))
+ggpairs(pizza, mapping=aes(col=brand, alpha=0.3))
+```
+
+### Task 1: Compare LDA and QDA for classifying the pizza brand based on measurements using in-sample predictions (i.e., not cross-validated). Which looks better?
+Hint: the error rate is `1-sum(diag(CM))` where `CM` is the confusion matrix.
+
+
+### Task 2: Now compare LDA and QDA using cross-validation. How does your answer change?
+
+
+### Task 3: Use your selected classifier to classify a pizza that has the following properties. Obtain predicted probabilities.
+
+* protein content of 12
+* fat content of 15
+* ash content of 1.5
+* sodium content of 0.6
+* carbohydrate content of 25
+* caloric content of 3
+
+**Hint:** See `?predict.lda`.
+

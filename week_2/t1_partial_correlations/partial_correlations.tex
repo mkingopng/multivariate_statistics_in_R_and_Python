@@ -1,0 +1,193 @@
+%! Author = noone
+%! Date = 31/10/22
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+% Document
+\begin{document}
+
+\section{Welcome to Week 2}\label{sec:welcome-to-week-2}
+Dr Pavel Krivitsky gives you a brief overview of topics and concepts we'll be
+covering in this week.
+
+Weekly learning outcomes
+\begin{itemize}
+    \item Calculate and interpret a partial correlation between two variables controlling for one or more variables.
+    \item Perform a hypothesis test for a partial correlation and interpret the conclusion in the context of the problem.
+    \item Explain the relationship between multiple correlation coefficient and R2R2 in multiple regression.
+    \item Explain the linear algebra foundations of a principal component analysis.
+    \item Interpret the results of a principal component analysis, relating the principal components to underlying variables.
+    \item Create and interpret a principal component biplot.
+    \item Select the optimal number of principal components according to several techniques.
+    \item Utilise principal components as a data reduction technique.
+\end{itemize}
+
+Topics we will cover:
+\begin{itemize}
+    \item Topic 1: Partial correlations
+    \begin{itemize}
+        \item H\&S does not have a dedicated section for this topic, but there is some discussion in Sections 4.2 (under Conditional Expectations) and 5.1 (under Conditional Approximations).
+        \item J\&W discusses this topic in Section 7.8 (under Partial Correlation Coefficient).
+        \item M discusses this topic in Section 5.3.
+    \end{itemize}
+    \item Topic 2: Multi correlation coefficients
+    \begin{itemize}
+        \item H\&S does not have a dedicated section for this topic, but there is some discussion in Sections 4.2 (under Conditional Expectations) and 5.1 (under Conditional Approximations).
+        \item J\&W discusses this topic in Section 7.8.
+        \item M discusses this topic in Section 5.2.
+    \end{itemize}
+    \item Topic 3: Testing correlation coefficients
+    \begin{itemize}
+        \item M discusses this topic in Sections 5.2 and 5.3. (Note that it is more theoretical than is required for this course.)
+    \end{itemize}
+    \item Topic 4: Principal component analysis
+    \begin{itemize}
+        \item H\&S discusses this topic in Chapter 11.
+        \item J\&W discusses this topic in Chapter 8.
+        \item M discusses this topic in Chapter 9.
+    \end{itemize}
+\end{itemize}
+
+H\&S: Härdle, Wolfgang K. and Simar, Léopold (2015) Applied Multivariate Statistical Analysis. 4th ed. Springer.
+
+J\&W: Johnson, Richard A. and Wichern, Dean W. (2007)  Applied Multivariate Statistical Analysis. 6th ed. Prentice Hall.
+
+M: Muirhead, Robb J. (1982) Aspects of Multivariate Statistical Theory. Wiley.
+
+\section{Questions about this week's topics?}\label{sec:questions-about-this-week's-topics?}
+
+This week's topics were prepared by Dr P. Krivitsky.
+If you have any questions or comments, please post them in the Forum.
+
+Partial correlation
+
+Introduction
+
+To begin Week 2, we will make some general comments on similarities and
+differences between correlations and dependencies.
+
+Very often we are interested in correlations (dependencies) between a number
+of random variables and are trying to describe the “strength” of the (mutual)
+dependencies.
+For example, we would like to know if there is a correlation (mutual
+non-directed dependence) between the length of the arm and of the leg.
+But, if we would like to get information about (or to predict) the length of
+the arm by measuring the length of the leg, we are dealing with the dependence
+of the arm’s length on the leg’s length.
+Both problems described in this example make sense.
+
+On the other hand, there are other examples/situations in which only one of
+the problems is interesting or makes sense.
+If we study the dependence between rain and crops, this makes a perfect sense
+but there is no sense at all to study the (directed) influence of crops on
+rain.
+
+In a nutshell, we can say that when studying the mutual (linear) dependence,
+we are dealing with correlation theory whereas when studying directed
+influence of one (input) variable on another (output) variable, we are dealing
+with regression theory.
+
+It should be clearly pointed out though that correlation alone, no matter how
+strong, can not help us identify the direction of influence and can not help
+us in regression modelling.
+Our reasoning about direction of influence should come outside of statistical
+theory, from another theory.
+
+Another important point to always bear in mind is that, as already discussed in
+The Multivariate Normal Distribution, uncorrelated does not necessarily mean
+independent if the multivariate data happens to fail the multivariate
+normality test.
+Nonetheless, for multivariate normal data, the notions of \("\)uncorrelated\("\)
+and \("\)independent\("\) coincide.
+
+
+In general, there are 3 types of correlation coefficients:
+\begin{itemize}
+    \item The usual correlation coefficient between 2 variables
+    \item Partial correlation coefficient between 2 variables after adjusting for the effect (regression, association) of a set of other variables
+    \item Multiple correlation between a single random variable and a set of pp other variables.
+\end{itemize}
+
+\section{Partial correlation}\label{sec:partial-correlation}
+
+For $X ~ N_p (\mu, \Sigma)$ we defined the correlation coefficient $\rho_{ij} = \dfrac{\sigma_{ij}}{\sqrt{\sigma_{ii}}\sqrt{\sigma_{jj}}}, i,j = 1, 2, \dots, p$
+and discussed the MLE $\hat{\rho}_{ij}$ in (1.12)(1.12).
+It turned out that they coincide with the sample correlations $r_{ij}$ we
+introduced in the Exploratory Data Analysis of Multivariate Data slide (formula
+(1.3)(1.3)).
+
+To define partial correlation coefficients, recall the Property 4 of the
+multivariate normal distribution from Week 1 (Properties of multivariate
+normal slide):
+
+If vector $X \in \mathbb{R}^p$ is divided into
+$X = \begin{pmatrix} X_{(1)} \\ X_{(2)}\end{pmatrix}, X_{(1)} \in R^r , r < p, X_{(2)} \in R^{p-r}$
+and according to this subdivision the vector means are $\mu = \begin{pmatrix} \mu_{(1)} \\ \mu_{(2)}\end{pmatrix}$
+and the covariance matrix $\sum$ has been subdivided into $\Sigma = \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma{22}\end{pmatrix}$
+and the rank of $\sum_{22}$ is full then the conditional density of $X_{(1)}$ given that $X_{(2)} = x_{(2)}$ is
+
+\[
+    N_r \bigg( \mu_{(1)} + \Sigma_{12} \Sigma_{22}^{-1} \bigg( x_{(2)} - \mu_{(2)} \bigg), \Sigma_{11} - \Sigma_{12} \Sigma_{22}^{-1} \Sigma_{21}\bigg)
+\]
+
+We define the partial correlations of  as the usual correlation coefficients
+calculated from the elements $\sigma_{ij.(r+1),(r+2)\dots,p}$ of the matrix
+$\Sigma_{1|2} = \Sigma_{11} - \Sigma_{22}^{-1} \Sigma_{21}$ i.e.
+
+\[
+    \rho_{ij.(r+1),(r+2),\dots,p} = \dfrac{\sigma_{ij.(r+1),(r+2),\dots,p}}{\sqrt{\sigma_{ii.(r+1),(r+2),\dots,p}}\sqrt{\sigma_{jj.(r+1),(r+2),\dots,p}}}
+\]
+
+We call $\rho_{ij.(r+1),(r+2),\dots,p}$ the correlation of the $i$th and $j$th
+component when the components $(r+1)(r+2)$, etc up to the $p$th (ie the last
+$p-r$ components) have been held fixed.
+The interpretation is that we are looking for the association (correlation)
+between the $i$th and $j$th component after eliminating the effect that the
+last $p-r$ components might have had on this association.
+
+To find ML estimates for these, we use the translation invariance property of
+the MLE to claim that if $\hat{\Sigma} = \begin{pmatrix} \hat{\Sigma}_{11} & \hat{\Sigma}_{12} \\ \hat{\Sigma}_{21} & \hat{\Sigma}_{22}  \end{pmatrix}$
+is the usual MLE of the covariance matrix then $\hat{\Sigma}_{1|2} = \hat{\Sigma}_{11} - \hat{\Sigma}_{12} \hat{\Sigma}_{22}^{-1} \hat{\Sigma}_{21}$
+with elements $\hat{\sigma}_{ij.(r+1),(r+2),\dots,p} i,j = 1,2,\dots, r$
+is the MLE of $\Sigma_{1|2}$ and correspondingly,
+
+\[
+    \hat{\rho}_{ij.(r+1),(r+2),\dots,p} = \dfrac{\sigma_{ij.(r+1),(r+2),\dots,p}}{\sqrt{\sigma_{ii.(r+1),(r+2),\dots,p}}\sqrt{\sigma_{jj.(r+1),(r+2),\dots,p}}} , i, j = 1,2, \dots r
+\]
+
+will be the ML estimators of $\rho_{ij.(r+1),(r+2),\dots,p} i, j, = 1, 2, \dots r$
+
+\section{Simple formulae}\label{sec:simple-formulae}
+
+For situations when pp is not large, as a partial case of the above general
+result, simple plug-in formulae are derived that express the partial
+correlation coefficients by the usual correlation coefficients.
+We shall discuss such formulae now.
+The formulae are given below:
+
+Partial correlation between first and second variable by adjusting
+for the effect of the third:
+
+\[
+\rho_{12.3} = \dfrac{\rho_{12} - \rho_{13}\rho+{23}}{\sqrt{(1 - \rho_{2}^{13})(1 - \rho_{23}^{2})}}
+\]
+
+Partial correlation between first and second variable by adjusting
+for the effects of third and fourth variable:
+
+\[
+\rho_{12.3} = \dfrac{\rho_{12.4} - \rho_{13.4}\rho+{23.4}}{\sqrt{(1 - \rho_{2}^{13.4})(1 - \rho_{23.4}^{2})}}
+\]
+
+For higher dimensional cases computers need to be utilised:
+R: ggm::pcor, ggm::parcor
+
+
+
+
+\end{document}

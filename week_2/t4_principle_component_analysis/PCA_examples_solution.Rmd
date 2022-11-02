@@ -1,0 +1,84 @@
+---
+title: "ZZSC5855 --- PCA Example"
+author:
+- "Pavel Krivitsky"
+- "Department of Statistics"
+- "University of New South Wales"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Packages
+```{r, message=FALSE}
+library(here)
+library(GGally)
+library(dplyr)
+library(readr)
+library(purrr)
+```
+
+
+# Challenge
+
+Consider the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
+
+`brand`
+: Pizza brand (class label)
+
+`id`
+: Sample analysed
+
+`prot`
+: Amount of protein per 100 grams in the sample
+
+`fat`
+: Amount of fat per 100 grams in the sample
+
+`ash`
+: Amount of ash per 100 grams in the sample
+
+`sodium`
+: Amount of sodium per 100 grams in the sample
+
+`carb`
+: Amount of carbohydrates per 100 grams in the sample
+
+`cal`
+: Amount of calories per 100 grams in the sample
+
+
+We will focus on brand A:
+```{r}
+pizzaA <- read_csv(here("datasets","pizza.csv")) %>% filter(brand=="A") %>% select(-brand)
+```
+
+### Task 1: Perform the PCA on these data, and identify a good number of principal components to use. Which variables covary, and how?
+
+#### Solution:
+```{r}
+(pizzaA.pc <- prcomp(pizzaA, scale=TRUE))
+summary(pizzaA.pc)
+
+pcvars <- pizzaA.pc$sdev^2 # Eigenvalues
+var.explained <- cumsum(pcvars)/sum(pcvars)
+plot(seq_along(pcvars), pcvars/sum(pcvars), type="o", ylim=c(0,1), xlab="k", ylab="Proportion of variance explained")
+points(seq_along(pcvars), var.explained, lty=2, type="o")
+legend("right", lty=c(1,2), legend=c("Individual","Cumulative"))
+abline(h=c(1/ncol(pizzaA), 0.9), lty=3)
+# c=90% of variance explained
+min(which(var.explained>=0.9))
+# Kaiser's rule:
+max(which(pcvars>=1))
+```
+
+We see that at least 2 components are necessary:
+```{r}
+biplot(pizzaA.pc, c(1,2))
+biplot(pizzaA.pc, c(1,3))
+biplot(pizzaA.pc, c(2,3))
+```
+We see that PC1 mostly represents caloric content (with fats and proteins being more calorie-dense than carbohydrates and infinitely more so than water). PC2 deals with sodium, ash (from baking), and carbohydrates (somewhat), which perhaps represents the amount of dough in the pizza. Lastly, if we view PC3 on the second biplot, we see that this direction concerns mostly protein content as distinct from fat and calories.
+
+
