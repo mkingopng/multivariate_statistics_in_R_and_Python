@@ -16,7 +16,6 @@ library(lavaan)
 library(tidySEM)
 ```
 
-
 # Anomie
 The following example is adapted with modifications from [Lavaan Tutorial](http://lavaan.ugent.be/tutorial/cov.html).
 
@@ -61,7 +60,6 @@ wheaton.cov
 ```
 
 ## Model specification
-
 The SEM is specified as an R string with syntax similar to R formulas but with special operations: `=~` for defining a latent variable, `~` for defining a regression (possibly among latent variables), and `~~` for defining correlation. The lines of model below can be read as follows (using the notation of the lecture notes).
 
 1. Output latent variable $\eta_1=$`Alien67` (sense of Alienation in 1967) is measured by output observed variables $Y_1=$`Anomie67` and $Y_2=$`Powerless67`, with coefficients specified to be 1.0 and 0.833. Note that this does not mean that they exactly equal, since there are also the noise terms $\epsilon_1$ and $\epsilon_2$.

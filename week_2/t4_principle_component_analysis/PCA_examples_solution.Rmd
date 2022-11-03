@@ -19,9 +19,7 @@ library(readr)
 library(purrr)
 ```
 
-
 # Challenge
-
 Consider the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
 
 `brand`

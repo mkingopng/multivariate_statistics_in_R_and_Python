@@ -11,7 +11,6 @@ output:
 
 
 # Packages
-
 ```{r, message=FALSE}
 library(here)
 library(readr)
@@ -21,9 +20,7 @@ library(ggm)
 ```
 
 # Intelligence, Weight, and Age
-
 Suppose that three variables have been measured for a set of schoolchildren:
-
 1. $X_{1}$: Intelligence
 2. $X_{2}$: Weight
 3. $X_{3}$: Age

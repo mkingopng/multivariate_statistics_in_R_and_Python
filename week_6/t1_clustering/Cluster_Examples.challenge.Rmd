@@ -26,7 +26,6 @@ library(mclust)
 
 
 # Challenges
-
 Recall the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
 
 `brand`
@@ -64,6 +63,4 @@ pizza0 <- select(pizza, -brand)
 
 ### Task 1: Supposing that we know that there are 10 brands, try using the various clustering methods to group the pizzas by brand. How well can you recover them?
 
-
 ### Task 2: Now, suppose that we don't know how many brands there were. How many would you infer from the unlabelled data?
-

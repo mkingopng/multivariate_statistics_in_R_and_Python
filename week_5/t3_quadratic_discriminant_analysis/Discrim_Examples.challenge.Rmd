@@ -24,7 +24,6 @@ library(heplots) # boxM
 
 
 # Challenges
-
 Recall the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
 
 `brand`

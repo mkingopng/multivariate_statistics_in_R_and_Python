@@ -11,13 +11,11 @@ output:
 
 
 # Packages
-
 ```{r, message=FALSE}
 library(GGally)
 ```
 
 # Equivalence between total correlation and regression
-
 This example demonstrates that total correlation is equivalent to the square root of the coefficient of determination of a linear regression.
 ```{r}
 x1 <- rnorm(100)

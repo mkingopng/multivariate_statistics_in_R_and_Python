@@ -21,9 +21,7 @@ library(readr)
 ```
 
 # Iris Example
-
 ## Data
-
 Recall the Iris dataset:
 ```{r}
 data(iris)
@@ -34,7 +32,6 @@ ggpairs(iris, aes(colour=Species, alpha = 0.3))
 We will use it to explore SVMs and tuning.
 
 ## Two-class SVM
-
 We will begin by focusing on two classes (virginica and versicolor) and two variables (Sepal Length and Width):
 ```{r}
 iris2 <- iris %>% filter(Species!="setosa") %>% select(Species,Sepal.Length,Sepal.Width) %>% mutate(Species=factor(Species))

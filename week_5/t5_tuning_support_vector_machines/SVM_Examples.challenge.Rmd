@@ -22,7 +22,6 @@ library(readr)
 
 
 # Challenges
-
 Recall the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
 
 `brand`

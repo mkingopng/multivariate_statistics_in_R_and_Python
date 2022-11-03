@@ -11,7 +11,6 @@ output:
 
 
 # Packages
-
 ```{r, message=FALSE}
 library(here)
 library(GGally)
@@ -22,7 +21,6 @@ library(purrr)
 
 
 # Challenge
-
 Consider the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
 
 `brand`

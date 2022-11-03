@@ -20,7 +20,6 @@ library(purrr)
 ```
 
 # Fitness Club Example
-
 Three physiological and three exercise variables were measured on twenty middle aged men in a fitness club. Canonical correlation is used to determine if the physiological variables are related in any way to the exercise variables. 
 
 ## Data

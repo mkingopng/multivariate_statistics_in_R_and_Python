@@ -25,7 +25,6 @@ library(Rsolnp)
 
 
 # Challenges
-
 Recall the red wines dataset:
 * `fixed acidity`
 * `volatile acidity`

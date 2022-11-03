@@ -2,7 +2,7 @@
 title: "ZZSC5855 --- PCA Example"
 author:
 - "Pavel Krivitsky"
-- "Deparment of Statistics"
+- "Department of Statistics"
 - "University of New South Wales"
 output:
   html_notebook: default
@@ -11,7 +11,6 @@ output:
 
 
 # Packages
-
 ```{r, message=FALSE}
 library(here)
 library(GGally)
@@ -21,9 +20,7 @@ library(purrr)
 ```
 
 # Example: Crime Rates in US States
-
 ## Data
-
 The following are rates of certain crimes in US states, with their [two-letter abbreviations](https://pe.usps.com/text/pub28/28apb.htm).
 
 ```{r}

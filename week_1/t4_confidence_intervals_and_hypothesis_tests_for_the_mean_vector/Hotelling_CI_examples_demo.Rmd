@@ -23,11 +23,9 @@ library(expm) # For %^% matrix power.
 ```
 
 # The Microwave Ovens Example
-
 We will use the data in Johnson and Wichern (2007), Examples 5.3--5.4 to illustrate Hotelling's $T^2$ confidence regions and to develop some intuition for their construction.
 
 ## Data
-
 We begin by loading the data and transforming (See the Multivariate Normal exercises.):
 ```{r}
 ovens4 <- read_csv(here("datasets","ovens.csv"))^(1/4)

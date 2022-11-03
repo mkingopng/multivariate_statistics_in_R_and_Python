@@ -2,7 +2,7 @@
 title: "ZZSC5855 --- Canonical Correlation Examples"
 author:
 - "Pavel Krivitsky"
-- "Deparment of Statistics"
+- "Department of Statistics"
 - "University of New South Wales"
 output:
   html_notebook: default

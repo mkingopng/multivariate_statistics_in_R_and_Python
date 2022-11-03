@@ -24,7 +24,6 @@ library(mclust)
 
 # Iris Example
 ## Data
-
 Suppose that we had mixed up our lab samples and no longer know which specimen comes from which species. Can we recover the species?
 ```{r}
 data(iris)

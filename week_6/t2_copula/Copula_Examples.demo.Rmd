@@ -18,13 +18,12 @@ library(purrr)
 library(reshape2)
 library(copula)
 library(GGally)
-library(stats4) # mle()
+library(stats4)  # mle()
 library(Rsolnp)
 ```
 
 
 # Examples of copula functions
-
 Useful function for plotting copulae:
 ```{r}
 copplot <- function(cop){
@@ -46,9 +45,7 @@ copplot(gumbelCopula(param=2, dim=2))
 ```
 
 # Microwave Ovens Example
-
 ## Data
-
 Recall the data about microwave ovens and their radiation when open as opposed to closed. We noted that the distributions were far from normal, and we therefore transformed them by taking the fourth root. Copula models allow us to model them directly.
 
 Load the data:

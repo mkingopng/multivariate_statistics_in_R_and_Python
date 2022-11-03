@@ -24,7 +24,6 @@ library(heplots) # boxM
 The famous iris dataset contains four measurements on 150 flowers from three subspecies of iris: setosa, versicolor, and virginica. We will use it to illustrate linear and quadratic discriminant analysis.
 
 ## Data
-
 This dataset is included with R. Let's load and visualise it.
 ```{r}
 data(iris)

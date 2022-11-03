@@ -28,7 +28,6 @@ select <- dplyr::select # Just to be safe.
 
 
 # Challenge
-
 Recall the dataset `pizza.csv`, containing nutritional data from a variety of pizza brands:
 
 `brand`

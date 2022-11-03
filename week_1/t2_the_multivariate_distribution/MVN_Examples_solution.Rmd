@@ -2,7 +2,7 @@
 title: "ZZSC5855 --- Multivariate Normal Distribution"
 author:
 - "Pavel Krivitsky"
-- "Deparment of Statistics"
+- "Department of Statistics"
 - "University of New South Wales"
 output:
   html_notebook: default

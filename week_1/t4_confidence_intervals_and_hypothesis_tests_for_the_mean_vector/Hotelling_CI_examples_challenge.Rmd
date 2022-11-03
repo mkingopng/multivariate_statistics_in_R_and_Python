@@ -3,7 +3,7 @@ title: "ZZSC5855 --- Multivariate Confidence Regions"
 author:
 - "Pavel Krivitsky"
 - "based on Johnson and Wichern AMSA, Examples 5.3--5.4"
-- "Deparment of Statistics"
+- "Department of Statistics"
 - "University of New South Wales"
 output:
   html_notebook:
@@ -13,7 +13,6 @@ output:
 
 
 # Packages
-
 ```{r, message=FALSE}
 library(here)
 library(car) # For drawing ellipsoids.
@@ -25,9 +24,7 @@ library(expm) # For %^% matrix power.
 
 
 # Challenge
-
 ## One-sample intervals
-
 We continue our analysis of of Portuguese red wines. We begin with the transformation suggested in the Multivariate Normality exercises:
 ```{r}
 red.t <- read_csv(here("datasets","winequality-red.extract7.csv")) %>% mutate(`log sulphates`=log(`sulphates`), `root4 free sulfur dioxide` = (`free sulfur dioxide`)^(1/4), `root4 total sulfur dioxide` = (`total sulfur dioxide`)^(1/4), `log fixed acidity`=log(`fixed acidity`), `log volatile acidity`=log(`volatile acidity`), .keep="unused")

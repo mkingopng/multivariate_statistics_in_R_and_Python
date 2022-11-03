@@ -21,12 +21,10 @@ library(GGally)
 ```
 
 # Socioeconomic Data
-
 Data were collected about five socioeconomic variables for 12 census data in the Los Angeles area. The five variables represent total population, median school years, total unemployment, miscellaneous professional services, and median house value. We will perform a factor analysis on these data and demonstrate maximum likelihood and varimax rotation.
 
 
 ## Data
-
 This dataset comprises measurements of five socioeconomic variables for 12 census tracts in the Los Angeles area:
 
 `pop`
